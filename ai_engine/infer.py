@@ -6,15 +6,15 @@ from pathlib import Path
 from PIL import Image
 
 try:
-    from service.core.rice_leaf_classifier import RiceLeafClassifier
-    from service.adapters.image_adapter import load_image_from_path
+    from ai_engine.crops.rice.inference.rice_leaf_classifier import RiceLeafClassifier
+    from ai_engine.common.adapters.image_adapter import load_image_from_path
 except ModuleNotFoundError:
     # Support running `python service/infer.py` from the project root.
     project_root = Path(__file__).resolve().parent.parent
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
-    from service.core.rice_leaf_classifier import RiceLeafClassifier
-    from service.adapters.image_adapter import load_image_from_path
+    from ai_engine.crops.rice.inference.rice_leaf_classifier import RiceLeafClassifier
+    from ai_engine.common.adapters.image_adapter import load_image_from_path
 
 
 def predict_image_file(

@@ -1601,7 +1601,7 @@ fn split_query(url: &str) -> (&str, &str) {
 
 fn resolve_static_file_path(file_path: &str) -> PathBuf {
     let normalized = file_path.trim_start_matches('/');
-    let preferred = PathBuf::from("frontend_v2_premium").join(normalized);
+    let preferred = PathBuf::from("frontend").join(normalized);
     if preferred.exists() {
         return preferred;
     }

@@ -24,9 +24,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from service.adapters.image_adapter import ImageLoadError
-from service.api.v1.predict import router as predict_router, set_classifier
-from service.core.rice_leaf_classifier import RiceLeafClassifier
+from ai_engine.common.adapters.image_adapter import ImageLoadError
+from ai_engine.crops.rice.inference.api import router as predict_router, set_classifier
+from ai_engine.crops.rice.inference.rice_leaf_classifier import RiceLeafClassifier
 
 # ------------------------------------------------------------------
 # Logging

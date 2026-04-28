@@ -33,3 +33,13 @@ Thumbs.db
 
 # Docker (avoid recursive context)
 docker-compose.yml
+
+# Archive
+archive/
+
+# Data
+datasets/
+local_data/
+outputs/
+
+!models/rice/rice_leaf_classifier/

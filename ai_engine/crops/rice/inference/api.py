@@ -15,8 +15,8 @@ import logging
 
 from fastapi import APIRouter, File, UploadFile
 
-from service.adapters.image_adapter import load_image_from_bytes
-from service.schemas.prediction import (
+from ai_engine.common.adapters.image_adapter import load_image_from_bytes
+from ai_engine.common.schemas.prediction import (
     ErrorResponse,
     PredictionItem,
     PredictionResponse,

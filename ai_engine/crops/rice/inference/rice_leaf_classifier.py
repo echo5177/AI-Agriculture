@@ -11,7 +11,7 @@ import torchvision
 from PIL import Image
 from torchvision import transforms
 
-from service.core.base_predictor import BasePredictor
+from ai_engine.common.base_predictor import BasePredictor
 
 logger = logging.getLogger(__name__)
 

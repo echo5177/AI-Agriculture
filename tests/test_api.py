@@ -88,8 +88,8 @@ async def client():
     """Create an HTTPX ASGI client with the model injected."""
     mock_classifier = _make_mock_classifier()
 
-    from service.api.v1.predict import set_classifier
-    from service.main import app
+    from ai_engine.crops.rice.inference.api import set_classifier
+    from ai_engine.main import app
 
     set_classifier(mock_classifier)
     transport = httpx.ASGITransport(app=app)
