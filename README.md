@@ -1,118 +1,43 @@
-# AI-Agriculture
-智慧农业系统方案 - 新一代 AI + 农业平台。
+# AI-Agriculture (AIT103 演示版 - 水稻 + 实时摄像头)
 
-当前仓库以 `cloud` Rust 接收端为核心，支持基于配置的传感器数据规则校验与 ACK 回传。
+这是一个针对 AIT103 课程优化的智慧农业 AI 系统原型。它展示了如何将水稻叶片病害识别模型集成到现代 Web 仪表盘中，并支持**手机端实时摄像头拍摄识别**。
 
-## Quick Start
-- 负责采集（固定负载）并通过 UDP 上报。
-- 使用 Rust 编写，适配 Linux/WSL 场景。
+## 核心亮点
+- **实时摄像头 (加分项)**：支持在浏览器中直接调用摄像头，周期性抓取帧并上传进行 AI 推理，模拟田间实时监控。
+- **水稻专属仪表盘**：精美的前端界面，实时展示环境传感器数据（模拟）与 AI 诊断历史。
+- **全 Python 架构**：无需配置数据库或 Rust 环境，在 Windows 本地一键启动。
 
-### 1. 环境要求
+## 快速启动 (Windows)
 
-- Rust 工具链（建议 stable，Edition 2021）
-- Cargo（随 Rust 一起安装）
-- Bash（用于运行脚本；Windows 可用 Git Bash / WSL）
+1. **环境准备**：
+   确保已安装 Python 3.9+。建议使用你已有的 `plant` conda 环境。
 
-### 2. 本地运行 cloud 接收端
+2. **安装依赖**：
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-cd cloud
-cargo run -- --config config/sensors.toml --bind ${CLOUD_BIND_ADDR:-0.0.0.0:9000} --timeout-ms 0
-```
-*(注：可通过配置 `CLOUD_BIND_ADDR` 环境变量或 `sensors.toml` 更改端口与IP。网关侧及串口波特率配置详见网关子仓文档。)*
+3. **启动系统**：
+   在根目录下运行：
+   ```bash
+   python -m ai_engine.main
+   ```
 
-### 3. 本地配置冒烟测试（脚本）
+4. **访问系统**：
+   - **主仪表盘**: [http://localhost:8000/rice_dashboard.html](http://localhost:8000/rice_dashboard.html)
+   - **实时摄像头页面**: [http://localhost:8000/mobile_live_capture.html](http://localhost:8000/mobile_live_capture.html)
 
-```bash
-cd cloud
-chmod +x scripts/local_config_smoke_test.sh
-./scripts/local_config_smoke_test.sh
-```
+## 目录结构
+- `ai_engine/`：后端推理服务逻辑（FastAPI）。
+- `frontend/rice/`：系统前端代码，包含仪表盘与摄像头采集页面。
+- `models/`：AI 模型权重文件（水稻分类器）。
+- `scripts/`：包含 `without_bounding_box_kaggle_baseline.py` 等核心训练脚本。
+- `local_data/`：测试用的示例数据。
 
-### 4. 运行自动化测试
+## 演示技巧 (必看)
+1. **启动服务**后，先在电脑或手机上打开 `mobile_live_capture.html`。
+2. 点击“启动摄像头”，然后点击“开始循环上传”。
+3. 随后回到主仪表盘页面，你会发现“视觉 AI 反馈”面板会实时刷新你刚刚拍摄到的画面和诊断结果。
 
-```bash
-cd cloud
-cargo test
-```
-
-## 技术栈与依赖清单
-
-### 语言与运行时
-
-- Rust（Edition 2021）
-
-### 主要依赖（`cloud/Cargo.toml`）
-
-- `serde`（含 `derive`）
-- `toml`
-
-### 部署相关
-
-- `cloud/deploy.sh`：Linux 服务器一键部署脚本
-- systemd（可选，脚本会优先使用）
-
-## 目录结构（核心）
-
-- `cloud/`：云端 UDP 接收器（Rust）
-- `cloud/config/sensors.toml`：传感器规则配置
-- `cloud/scripts/local_config_smoke_test.sh`：本地脚本 smoke test
-- `cloud/tests/`：集成测试目录
-- `doc/`：协作与流程文档
-
-## 测试说明
-
-- 单元测试：位于 `cloud/src/main.rs` 中
-- 集成 smoke 测试：位于 `cloud/tests/smoke_e2e.rs`
-
-## AI 模块补充说明
-
-- `ai_engine/`：本地模型加载与单张图片推理逻辑，详见 `ai_engine/README.md`
-- `scripts/`：数据集整理、训练等脚本，详见 `scripts/README.md`
-- `tests/`：AI 模块的 `pytest` 测试代码
-- `models/`：分类模型的配置文件、标签文件与说明
-- `local_data/`：本地数据说明与数据集目录
-- `outputs/`：训练输出与模型产物目录
-
-## Python 依赖与测试补充
-
-如需运行 AI 相关脚本或测试，可在仓库根目录执行：
-
-```bash
-pip install -r requirements.txt
-pytest -q
-```
-
-补充说明：
-
-- 根目录已提供 `pytest.ini`，可直接在仓库根目录运行 `pytest`，无需额外设置 `PYTHONPATH`
-- 如仅需运行 AI 模块测试，可使用 `pytest -q tests`
-- `tests/test_infer_smoke.py` 依赖 `torch` 与 `torchvision`
-
-## Configuration-First Deployment Notes
-
-Use environment variables or deployment config files to switch environments.
-Do not hardcode a fixed server IP, serial path, or port in code.
-
-Recommended variables:
-
-- `CLOUD_BIND_ADDR` (example: `0.0.0.0:9000`)
-- `AI_PREDICT_URL` (example: `http://ai-engine:8000/api/v1/predict`)
-- `OPENCLAW_URL` (example: `http://openclaw:3000`)
-- `TOKEN_STORE_PATH`, `REGISTRY_PATH`, `TELEMETRY_STORE_PATH`
-- `IMAGE_STORE_PATH`, `IMAGE_INDEX_PATH`, `IMAGE_DB_ERROR_STORE_PATH`
-
-Gateway-side variables (WSL/edge):
-
-- `GATEWAY_CLOUD_TARGET`
-- `GATEWAY_BAUD_LIST`
-- `GATEWAY_MODBUS_PORT`
-- `GATEWAY_IMAGE_UPLOAD_URL` (or compose via gateway config)
-
-Acceptance rule:
-
-- Switch target environment by changing configuration only, without code edits.
-
-## License
-
-本项目使用 MIT License，详见根目录 `LICENSE`。
+## 许可证
+本项目使用 MIT License。
