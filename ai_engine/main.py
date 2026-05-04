@@ -22,14 +22,13 @@ import os
 import sys
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from ai_engine.common.adapters.image_adapter import ImageLoadError
 from ai_engine.common.health import router as common_router
+from ai_engine.common.mock_api import router as mock_router
 from ai_engine.crops.rice.inference.api import router as rice_router, set_classifier
-from ai_engine.crops.oil_palm.inference.api import router as oil_palm_router
 
 # ------------------------------------------------------------------
 # Logging
@@ -91,9 +90,6 @@ async def lifespan(app: FastAPI):
             logger.error("FATAL: Rice model failed to load at startup: %s", exc)
             # Fail fast: orchestration (Docker/K8s) will see the crash and not route traffic.
             raise RuntimeError(f"Required model assets not found or invalid: {exc}") from exc
-    elif CROP_PROFILE == "oil_palm":
-        logger.info("Oil Palm mode: Using mock/future YOLOv8 predictor.")
-    
     yield
     logger.info("=== Smart Farm AI Engine shutting down ===")
 
@@ -137,7 +133,17 @@ app.add_middleware(
 
 app.include_router(common_router, prefix="/api/v1")
 app.include_router(rice_router, prefix="/api/v1")
-app.include_router(oil_palm_router, prefix="/api/v1")
+app.include_router(mock_router, prefix="/api/v1")
+
+# Serve Rice Frontend
+# Mount /static for assets, and mount root for html files
+app.mount("/static", StaticFiles(directory="frontend/rice"), name="static")
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/rice_dashboard.html")
+
+app.mount("/", StaticFiles(directory="frontend/rice", html=True), name="frontend")
 
 
 # ------------------------------------------------------------------
@@ -162,3 +168,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"status": "error", "message": "Internal inference error"},
     )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

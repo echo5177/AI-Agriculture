@@ -1,1 +1,19 @@
--r requirements/base.txt
+# ---------------------------------------------------------------
+# AIT103 - Simplified Rice AI Service (Dev Branch)
+# ---------------------------------------------------------------
+numpy
+pillow
+pydantic
+fastapi
+uvicorn[standard]
+python-multipart
+PyYAML
+jinja2
+
+# AI & Data Science
+torch
+torchvision
+scikit-learn
+tqdm
+matplotlib
+pandas
