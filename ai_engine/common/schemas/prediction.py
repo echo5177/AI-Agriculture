@@ -18,6 +18,8 @@ class PredictionResponse(BaseModel):
     topk: list[TopKItem] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    model_config = {"protected_namespaces": ()}
+
 
 class PredictionResult(BaseModel):
     task: str
