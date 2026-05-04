@@ -1,7 +1,0 @@
--r base.txt
-pytest
-httpx
-pytest-asyncio
-black
-isort
-flake8

@@ -1,7 +1,0 @@
-numpy
-pillow
-pydantic
-fastapi
-uvicorn[standard]
-python-multipart
-PyYAML

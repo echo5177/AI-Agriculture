@@ -1,4 +1,0 @@
--r rice-inference.txt
-tqdm
-matplotlib
-pandas

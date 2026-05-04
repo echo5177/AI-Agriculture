@@ -1,2 +1,0 @@
--r oil-palm-inference.txt
-# Add any training specific deps here
