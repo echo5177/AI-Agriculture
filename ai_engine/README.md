@@ -6,20 +6,14 @@
 
 ```
 ai_engine/
-├── main.py                          # FastAPI 入口（模型预加载、静态资源挂载）
-├── infer.py                         # 本地单图推理 CLI 工具
-├── common/                          # 跨作物共享模块
-│   ├── adapters/
-│   │   └── image_adapter.py         # 图像格式校验与适配
-│   ├── mock_api.py                  # 演示版 Mock 接口（现已集成真实上传回显）
-│   └── health.py                    # 服务健康检查
-└── crops/                           # 作物识别逻辑
+├── main.py                          # FastAPI 入口（模型加载、路由挂载、静态资源）
+└── crops/                           # 核心识别逻辑
     └── rice/
         └── inference/
-            ├── api.py               # 核心接口：/image/upload, /image/file
+            ├── api.py               # 单文件逻辑核心：包含所有接口、校验与 Mock 逻辑
             └── rice_leaf_classifier.py  # 水稻病害 AI 分类器
 local_data/
-└── uploads/                         # 本地存储：保存上传的图片及推理元数据 (.json)
+└── uploads/                         # 本地存储：保存图片及 .json 元数据
 ```
 
 ## 核心功能：识别与存储闭环
