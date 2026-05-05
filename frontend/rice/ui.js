@@ -117,11 +117,11 @@ window.UI = (() => {
                     </div>
                     <div>
                         <p class="text-[10px] text-slate-500 font-mono mb-0.5">${latest?.device_id || '-'}</p>
-                        <h3 class="text-xs font-bold text-white tracking-wider">${sid.toUpperCase()}</h3>
-                        <p class="text-[10px] text-slate-400 mt-1">${fieldPreview || window.t('no_data')}</p>
+                        <h3 class="text-xs font-bold text-slate-900 tracking-wider">${sid.toUpperCase()}</h3>
+                        <p class="text-[10px] text-slate-600 mt-1">${fieldPreview || window.t('no_data')}</p>
                     </div>
                     <div class="flex items-center justify-between mt-1 pt-2 border-t border-white/5">
-                        <span class="text-[9px] text-slate-400">STATUS: ${window.t(isFault ? 'status_fault' : 'status_online')}</span>
+                        <span class="text-[9px] text-slate-600">STATUS: ${window.t(isFault ? 'status_fault' : 'status_online')}</span>
                         <i class="fa fa-chevron-right text-[10px] text-slate-600 group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>`;
@@ -143,13 +143,13 @@ window.UI = (() => {
             .map((f) => {
                 const display = window.API.formatNumeric(values[f.field], f.unit);
                 return `
-                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                    <div class="flex items-center justify-between p-4 bg-slate-900/5 rounded-xl border border-white/5">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-2 rounded-full ${isFault ? 'bg-rose-400' : 'bg-emerald-400'}"></div>
-                            <span class="text-xs text-slate-300 font-bold">${f.label}</span>
+                            <span class="text-xs text-slate-700 font-bold">${f.label}</span>
                         </div>
                         <div class="text-right">
-                            <span class="text-sm font-mono text-white">${display}</span>
+                            <span class="text-sm font-mono text-slate-900">${display}</span>
                             <span class="text-[10px] text-slate-500 ml-1">${f.unit || ''}</span>
                         </div>
                     </div>
@@ -164,17 +164,17 @@ window.UI = (() => {
                     <div class="w-48 h-48 rounded-full border-8 border-emerald-500/20 flex items-center justify-center relative shadow-[0_0_50px_rgba(16,185,129,0.1)]">
                         <div class="text-center">
                             <p class="text-[10px] text-emerald-400 font-bold tracking-widest uppercase">${window.t('sensor_status')}</p>
-                            <p class="text-5xl font-black ${isFault ? 'text-rose-400' : 'text-white'} tracking-widest">${window.t(isFault ? 'status_fault' : 'status_ok')}</p>
+                            <p class="text-5xl font-black ${isFault ? 'text-rose-400' : 'text-slate-900'} tracking-widest">${window.t(isFault ? 'status_fault' : 'status_ok')}</p>
                         </div>
                         <div class="absolute inset-[-12px] border-2 border-dashed border-emerald-400/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
                     </div>
-                    <h2 class="mt-8 text-2xl font-black text-white tracking-widest uppercase">${sid}</h2>
-                    <p class="text-xs text-slate-400 mt-2 font-mono">LATEST_TS: ${formatDate(latest?.ts)}</p>
+                    <h2 class="mt-8 text-2xl font-black text-slate-900 tracking-widest uppercase">${sid}</h2>
+                    <p class="text-xs text-slate-600 mt-2 font-mono">LATEST_TS: ${formatDate(latest?.ts)}</p>
                     ${reasons.length ? `<p class="text-[10px] text-rose-400 mt-2">${reasons.join(', ')}</p>` : ''}
                 </div>
                 <div class="space-y-6">
                     <div class="glass-panel p-6">
-                        <h3 class="text-sm font-bold text-slate-200 mb-6 flex items-center gap-2 uppercase tracking-widest"><i class="fa fa-list text-emerald-500"></i>${window.t('field_details')}</h3>
+                        <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2 uppercase tracking-widest"><i class="fa fa-list text-emerald-500"></i>${window.t('field_details')}</h3>
                         <div class="space-y-4">
                             ${rows || '<p class="text-slate-500 italic text-sm">' + window.t('no_data') + '</p>'}
                         </div>
@@ -204,7 +204,7 @@ window.UI = (() => {
                 ? { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', badge: 'FAILED' }
                 : state === 'inferred'
                     ? { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', badge: 'INFERRED' }
-                    : { bg: 'bg-white/5', text: 'text-slate-400', border: 'border-white/5', badge: 'STORED' };
+                    : { bg: 'bg-slate-900/5', text: 'text-slate-600', border: 'border-white/5', badge: 'STORED' };
         const modeClass = captureMode === 'manual'
             ? 'bg-sky-500/15 text-sky-300 border-sky-400/30'
             : 'bg-violet-500/15 text-violet-300 border-violet-400/30';
@@ -216,15 +216,15 @@ window.UI = (() => {
         return `
             <div class="p-4 border ${card.border} ${card.bg} rounded-xl mb-3">
                 <div class="flex justify-between items-start mb-2 gap-2">
-                    <p class="text-[10px] text-slate-400 font-mono">${formatDate(r.captured_at || r.ts)}</p>
+                    <p class="text-[10px] text-slate-600 font-mono">${formatDate(r.captured_at || r.ts)}</p>
                     <div class="flex items-center gap-1.5">
                         <span class="text-[9px] uppercase font-bold px-2 py-0.5 border rounded-full ${modeClass}">${modeLabel}</span>
                         <span class="text-[10px] ${card.text} uppercase font-bold">${card.badge}</span>
                     </div>
                 </div>
-                <h4 class="text-sm font-bold text-white mb-1.5">${r.predicted_class || window.t('processing')}</h4>
-                <p class="text-[11px] text-slate-300 mb-2">${window.t('disease_rate')}: <span class="${card.text} font-semibold">${diseaseRate}</span></p>
-                <div class="h-28 w-full bg-black/30 rounded-lg overflow-hidden border border-white/10 cursor-pointer" onclick="UI.openImagePreview('${imgUrl}', '${safeUploadId}')">
+                <h4 class="text-sm font-bold text-slate-900 mb-1.5">${r.predicted_class || window.t('processing')}</h4>
+                <p class="text-[11px] text-slate-700 mb-2">${window.t('disease_rate')}: <span class="${card.text} font-semibold">${diseaseRate}</span></p>
+                <div class="h-28 w-full bg-slate-900/10 rounded-lg overflow-hidden border border-white/10 cursor-pointer" onclick="UI.openImagePreview('${imgUrl}', '${safeUploadId}')">
                     ${imgUrl
                         ? `<img src="${imgUrl}" alt="${safeUploadId}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center text-xs text-slate-500&quot;>${window.t('img_fail')}</div>';" />`
                         : '<div class="w-full h-full flex items-center justify-center text-xs text-slate-500">' + window.t('no_data') + '</div>'}
@@ -247,12 +247,12 @@ window.UI = (() => {
         const manualRows = latestImageUploads.filter((row) => inferCaptureMode(row) === 'manual');
         const autoRows = latestImageUploads.filter((row) => inferCaptureMode(row) !== 'manual');
         const sectionHtml = (title, icon, rows, mode) => `
-            <div class="border border-white/10 rounded-xl p-3 bg-black/20">
+            <div class="border border-white/10 rounded-xl p-3 bg-slate-900/5">
                 <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-[10px] uppercase tracking-widest font-bold text-slate-200 flex items-center gap-2">
+                    <h4 class="text-[10px] uppercase tracking-widest font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa ${icon}"></i>${title}
                     </h4>
-                    <span class="text-[10px] text-slate-400 font-mono">${rows.length}</span>
+                    <span class="text-[10px] text-slate-600 font-mono">${rows.length}</span>
                 </div>
                 ${
                     rows.length
@@ -313,7 +313,7 @@ window.UI = (() => {
             if (!container) return;
             let html = '';
             if (type === 'location') {
-                html += `<div class="px-4 py-2.5 text-[11px] text-slate-300 hover:bg-emerald-500/10 cursor-pointer flex items-center gap-2 transition-colors" onclick="UI.HomePositioning.selectLocation(null)">
+                html += `<div class="px-4 py-2.5 text-[11px] text-slate-700 hover:bg-emerald-500/10 cursor-pointer flex items-center gap-2 transition-colors" onclick="UI.HomePositioning.selectLocation(null)">
                     <i class="fa fa-globe text-blue-400 text-[10px]"></i>
                     <span class="font-bold uppercase tracking-wider">${window.t('all_locations')}</span>
                 </div>`;
@@ -321,7 +321,7 @@ window.UI = (() => {
             items.forEach(item => {
                 const icon = type === 'crop' ? 'fa-leaf text-emerald-400' : 'fa-map-pin text-blue-400';
                 const fn = type === 'crop' ? 'selectCrop' : 'selectLocation';
-                html += `<div class="px-4 py-2.5 text-[11px] text-slate-300 hover:bg-emerald-500/10 cursor-pointer flex items-center gap-2 transition-colors" onclick="UI.HomePositioning.${fn}('${item}')">
+                html += `<div class="px-4 py-2.5 text-[11px] text-slate-700 hover:bg-emerald-500/10 cursor-pointer flex items-center gap-2 transition-colors" onclick="UI.HomePositioning.${fn}('${item}')">
                     <i class="fa ${icon} text-[10px]"></i>
                     <span class="font-bold uppercase tracking-wider">${item}</span>
                 </div>`;
@@ -436,7 +436,7 @@ window.UI = (() => {
             const statusEl = document.getElementById('mobileUploadStatus');
             if (!statusEl) return;
             const palette = {
-                idle: 'text-slate-400',
+                idle: 'text-slate-600',
                 loading: 'text-emerald-300',
                 success: 'text-emerald-400',
                 error: 'text-rose-400',
@@ -602,14 +602,14 @@ window.UI = (() => {
                         <div class="sector-crop-group">
                             <div class="sector-item ${isActive ? 'active' : ''}" onclick="UI.Charts.toggleCropLocations('${crop}', this)">
                                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex-1">${crop}</span>
+                                <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex-1">${crop}</span>
                                 <i class="fa fa-chevron-${isActive ? 'up' : 'down'} text-[8px] text-slate-500"></i>
                             </div>
                             <div class="sector-locations ${isActive ? '' : 'hidden'}" id="crop-locs-${crop}">
                                 ${locs.map(loc => `
                                     <div class="sector-sub-item ${Charts.selectedCrop === crop && Charts.selectedLocation === loc ? 'active' : ''}" onclick="UI.Charts.selectCropLocation('${crop}', '${loc}', this, event)">
                                         <i class="fa fa-map-pin text-[8px] text-blue-400/60"></i>
-                                        <span class="text-[10px] text-slate-400 font-bold tracking-wider">${loc}</span>
+                                        <span class="text-[10px] text-slate-600 font-bold tracking-wider">${loc}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -630,7 +630,7 @@ window.UI = (() => {
                     <label class="sensor-pill cursor-pointer group">
                         <input type="checkbox" value="${sid}" class="hidden peer" checked />
                         <i class="fa ${sid.includes('soil') ? 'fa-leaf' : 'fa-microchip'} text-[10px] text-slate-500 peer-checked:text-emerald-400"></i>
-                        <span class="text-[10px] text-slate-400 peer-checked:text-emerald-100 uppercase font-bold">${sid}</span>
+                        <span class="text-[10px] text-slate-600 peer-checked:text-emerald-100 uppercase font-bold">${sid}</span>
                     </label>
                 `).join('');
             }
@@ -851,11 +851,11 @@ window.UI = (() => {
                     card.innerHTML = `
                         <div class="flex items-center justify-between mb-8">
                             <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-xl bg-slate-900/5 border border-white/10 flex items-center justify-center">
                                     <i class="fa ${sid.includes('soil') ? 'fa-leaf' : 'fa-area-chart'} text-emerald-400"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-xs font-black text-white uppercase tracking-widest">${sid} / ${fieldSpec.label} ${fieldSpec.unit ? `(${fieldSpec.unit})` : ''}</h4>
+                                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest">${sid} / ${fieldSpec.label} ${fieldSpec.unit ? `(${fieldSpec.unit})` : ''}</h4>
                                     <p class="text-[9px] text-slate-500 font-mono">HASH: ${btoa(sid + fieldName).slice(0, 8)}</p>
                                 </div>
                             </div>
@@ -966,7 +966,7 @@ window.UI = (() => {
                                                     : `<div class="w-full h-full flex items-center justify-center text-xs text-slate-500">${window.t('no_data')}</div>`
                                             }
                                             <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-black/40 rounded px-1.5 py-0.5">
-                                                <span class="text-[8px] text-white/80 font-mono">${formatDate(row.captured_at || row.received_at)}</span>
+                                                <span class="text-[8px] text-slate-900/80 font-mono">${formatDate(row.captured_at || row.received_at)}</span>
                                                 <span class="text-[8px] text-emerald-300 font-black">${row.upload_status || '-'}</span>
                                             </div>
                                         </div>
@@ -1048,7 +1048,7 @@ window.UI = (() => {
             container.innerHTML = servers.map(s => `
                 <div class="status-card health-${s.status} mb-4">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-white">${s.name}</span>
+                        <span class="text-xs font-bold text-slate-900">${s.name}</span>
                         <div class="health-dot dot-${s.status}"></div>
                     </div>
                     <p class="text-[10px] text-slate-500 italic">${s.detail}</p>
@@ -1114,12 +1114,12 @@ window.UI = (() => {
                 return `
                 <div class="status-card health-${status} mb-4">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-white uppercase">${sid}</span>
+                        <span class="text-xs font-bold text-slate-900 uppercase">${sid}</span>
                         <div class="health-dot dot-${status}"></div>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <p class="text-[9px] text-slate-400 font-medium">${reasonText}</p>
-                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden mt-1">
+                        <p class="text-[9px] text-slate-600 font-medium">${reasonText}</p>
+                        <div class="h-1 w-full bg-slate-900/5 rounded-full overflow-hidden mt-1">
                             <div class="h-full ${status === 'ok' ? 'bg-emerald-500' : (status === 'warning' ? 'bg-amber-500' : 'bg-rose-500')} w-[${status === 'ok' ? '100%' : '100%'}]"></div>
                         </div>
                     </div>
@@ -1329,7 +1329,7 @@ window.UI = (() => {
 
                 container.innerHTML = UI.AI.instructionList.map((instr, idx) => `
                     <div class="instruction-item flex items-start gap-2 group">
-                        <span class="flex-1 text-[11px] text-slate-400 line-clamp-2 leading-tight">${instr}</span>
+                        <span class="flex-1 text-[11px] text-slate-600 line-clamp-2 leading-tight">${instr}</span>
                         <button onclick="UI.AI.removeInstruction(${idx})" class="remove-btn text-[10px] text-rose-500/50 hover:text-rose-500">
                             <i class="fa fa-times-circle"></i>
                         </button>
