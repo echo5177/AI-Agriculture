@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Lightweight localization (I18n) core.
  */
 window.I18N = (() => {
@@ -7,7 +7,7 @@ window.I18N = (() => {
     const DICT = {
         zh: {
             nav_home: '首页', nav_charts: '图表', nav_health: '设备健康', nav_refresh: '刷新系统',
-            sys_running: '系统运行中', cloud_status: '云端服务器状态', support_online: '在线协助中',
+            sys_running: '推理引擎就绪', cloud_status: '云端服务器状态', support_online: '在线协助中',
             chat_placeholder: '发送指令...', chat_main_placeholder: '在此输入深度指令或技术咨询...',
             crop_select: '作物种类选择', loc_select: '位置选择', all_locations: '全部位置',
             field_details: '字段明细', no_data: '无数据', processing: '处理中', disease_rate: '患病率',
@@ -47,7 +47,7 @@ window.I18N = (() => {
         },
         en: {
             nav_home: 'Dashboard', nav_charts: 'Analytics', nav_health: 'System Health', nav_refresh: 'Refresh System',
-            sys_running: 'System Active', cloud_status: 'Cloud Server Node Status', support_online: 'Online Assisting',
+            sys_running: 'Engine Ready', cloud_status: 'Cloud Server Node Status', support_online: 'Online Assisting',
             chat_placeholder: 'Send command...', chat_main_placeholder: 'Enter deep commands or technical inquiries...',
             crop_select: 'Select Crop', loc_select: 'Select Location', all_locations: 'All Locations',
             field_details: 'Field Diagnostics', no_data: 'No Data', processing: 'Processing', disease_rate: 'Disease Rate',
@@ -87,7 +87,7 @@ window.I18N = (() => {
         },
         ms: {
             nav_home: 'Laman Utama', nav_charts: 'Analisis', nav_health: 'Kesihatan Sistem', nav_refresh: 'Segar Semula Sistem',
-            sys_running: 'Sistem Aktif', cloud_status: 'Status Pelayan Awan', support_online: 'Bantuan Dalam Talian',
+            sys_running: 'Enjin Sedia', cloud_status: 'Status Pelayan Awan', support_online: 'Bantuan Dalam Talian',
             chat_placeholder: 'Hantar arahan...', chat_main_placeholder: 'Masukkan arahan mendalam atau pertanyaan teknikal...',
             crop_select: 'Pilih Tanaman', loc_select: 'Pilih Lokasi', all_locations: 'Semua Lokasi',
             field_details: 'Butiran Medan', no_data: 'Tiada Data', processing: 'Sedang Diproses', disease_rate: 'Kadar Penyakit',
