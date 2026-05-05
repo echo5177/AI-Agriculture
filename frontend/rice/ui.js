@@ -216,7 +216,7 @@ window.UI = (() => {
         return `
             <div class="p-4 border ${card.border} ${card.bg} rounded-xl mb-3">
                 <div class="flex justify-between items-start mb-2 gap-2">
-                    <p class="text-[10px] text-slate-400 font-mono">${formatDate(r.captured_at || r.ts)}</p>
+                    <p class="text-[10px] text-slate-300 font-mono">${formatDate(r.captured_at || r.ts)}</p>
                     <div class="flex items-center gap-1.5">
                         <span class="text-[9px] uppercase font-bold px-2 py-0.5 border rounded-full ${modeClass}">${modeLabel}</span>
                         <span class="text-[10px] ${card.text} uppercase font-bold">${card.badge}</span>
