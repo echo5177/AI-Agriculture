@@ -380,7 +380,7 @@ window.UI = (() => {
 
             if (livePocLink) {
                 const did = encodeURIComponent(Upload.activeDeviceId || 'dev_mobile_live_01');
-                livePocLink.href = `/rice/mobile_live_capture.html?device_id=${did}`;
+                livePocLink.href = `/mobile_live_capture.html?device_id=${did}`;
             }
 
             Upload.isMobileClient = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
