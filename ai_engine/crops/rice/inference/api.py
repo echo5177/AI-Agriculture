@@ -1,6 +1,11 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, UploadFile, Query, HTTPException
+from fastapi.responses import FileResponse
+import uuid
+import os
+import shutil
+from datetime import datetime
 
 from ai_engine.common.adapters.image_adapter import validate_image_bytes
 from ai_engine.common.schemas.prediction import PredictionResponse
@@ -48,6 +53,74 @@ async def predict_rice(file: UploadFile = File(...)) -> dict:
     result = _predict(image_bytes)
     return result.model_dump()
 
+
+UPLOAD_DIR = "local_data/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@router.post("/image/upload")
+async def upload_image(
+    file: UploadFile = File(...),
+    device_id: str = Query(...),
+    ts: str = Query(None),
+    location: str = Query(None),
+    crop_type: str = Query(None),
+    farm_note: str = Query(None)
+):
+    """Handle image upload, store locally, and run inference."""
+    try:
+        # 1. Generate unique ID and save file
+        upload_id = str(uuid.uuid4())
+        ext = os.path.splitext(file.filename)[1] or ".jpg"
+        file_path = os.path.join(UPLOAD_DIR, f"{upload_id}{ext}")
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # 2. Read back for inference
+        with open(file_path, "rb") as f:
+            image_bytes = f.read()
+        
+        # 3. Run AI Inference
+        prediction = _predict(image_bytes)
+        
+        # 4. Save metadata for persistence (to be read by mock_api)
+        meta_path = os.path.join(UPLOAD_DIR, f"{upload_id}.json")
+        import json
+        with open(meta_path, "w", encoding="utf-8") as fmeta:
+            json.dump({
+                "predicted_class": prediction.predicted_class,
+                "confidence": prediction.confidence,
+                "disease_rate": prediction.metadata.get("disease_rate", 0.0),
+                "captured_at": ts or datetime.utcnow().isoformat() + "Z"
+            }, fmeta)
+
+        # 5. Return combined result matching frontend expectations
+        return {
+            "status": "success",
+            "upload_id": upload_id,
+            "predicted_class": prediction.predicted_class,
+            "confidence": prediction.confidence,
+            "disease_rate": prediction.metadata.get("disease_rate", 0.0),
+            "captured_at": ts or datetime.utcnow().isoformat() + "Z",
+            "upload_status": "inferred"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/image/file")
+async def get_image_file(upload_id: str = Query(None), saved_path: str = Query(None)):
+    """Serve the actual image file to the frontend."""
+    if upload_id:
+        # Search for the file with any extension in the upload dir
+        for f in os.listdir(UPLOAD_DIR):
+            if f.startswith(upload_id):
+                return FileResponse(os.path.join(UPLOAD_DIR, f))
+    
+    if saved_path:
+        if os.path.exists(saved_path):
+            return FileResponse(saved_path)
+            
+    raise HTTPException(status_code=404, detail="Image not found")
 
 @router.get("/rice/health")
 def rice_health() -> dict:

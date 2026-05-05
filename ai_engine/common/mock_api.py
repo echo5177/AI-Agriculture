@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Query
 from datetime import datetime, timedelta
 import random
 import uuid
+import os
 
 router = APIRouter(tags=["mock"])
 
@@ -78,19 +79,52 @@ async def get_telemetry(
     return rows
 
 @router.get("/image/uploads")
-async def get_image_uploads(limit: int = 5):
+async def get_image_uploads(limit: int = 10):
     uploads = []
-    classes = ["HealthyLeaf", "BrownSpot", "LeafBlast", "BacterialLeafBlight"]
-    for i in range(limit):
-        uploads.append({
-            "upload_id": str(uuid.uuid4()),
-            "device_id": "MOBILE-CAM",
-            "captured_at": (datetime.utcnow() - timedelta(minutes=i*45)).isoformat() + "Z",
-            "upload_status": "inferred",
-            "predicted_class": random.choice(classes),
-            "disease_rate": round(random.uniform(0.1, 0.45), 3)
-        })
-    return uploads
+    
+    # 1. Add real uploads from local_data/uploads if any
+    upload_dir = "local_data/uploads"
+    if os.path.exists(upload_dir):
+        import json
+        files = [f for f in os.listdir(upload_dir) if not f.endswith(".json")]
+        files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(upload_dir, x)), reverse=True)
+        for f in files[:limit]:
+            uid = os.path.splitext(f)[0]
+            mtime = datetime.fromtimestamp(os.path.getmtime(os.path.join(upload_dir, f)))
+            
+            # Try to load real metadata
+            meta_path = os.path.join(upload_dir, f"{uid}.json")
+            real_meta = {}
+            if os.path.exists(meta_path):
+                try:
+                    with open(meta_path, "r", encoding="utf-8") as fm:
+                        real_meta = json.load(fm)
+                except:
+                    pass
+
+            uploads.append({
+                "upload_id": uid,
+                "device_id": "MOBILE-CAM",
+                "captured_at": real_meta.get("captured_at") or mtime.isoformat() + "Z",
+                "upload_status": "inferred",
+                "predicted_class": real_meta.get("predicted_class") or "Processing...",
+                "disease_rate": real_meta.get("disease_rate") or 0.0
+            })
+
+    # 2. Add some mock data if we have few real files
+    if len(uploads) < limit:
+        classes = ["HealthyLeaf", "BrownSpot", "LeafBlast", "BacterialLeafBlight"]
+        for i in range(limit - len(uploads)):
+            uploads.append({
+                "upload_id": str(uuid.uuid4()),
+                "device_id": "MOCK-DEV",
+                "captured_at": (datetime.utcnow() - timedelta(minutes=(i+1)*45)).isoformat() + "Z",
+                "upload_status": "inferred",
+                "predicted_class": random.choice(classes),
+                "disease_rate": round(random.uniform(0.1, 0.45), 3)
+            })
+            
+    return uploads[:limit]
 
 @router.post("/chat")
 async def chat_proxy(request: Request):
