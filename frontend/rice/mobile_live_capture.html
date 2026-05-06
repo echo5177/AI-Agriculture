@@ -124,7 +124,8 @@
         ts,
         location: locationVal,
         crop_type: cropType,
-        farm_note: farmNote
+        farm_note: farmNote,
+        capture_mode: 'manual'
       });
       const form = new FormData();
       form.append("file", blob, `live_${Date.now()}.jpg`);

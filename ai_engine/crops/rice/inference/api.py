@@ -86,7 +86,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 async def upload_image(
     file: UploadFile = File(...),
     device_id: str = Query(...),
-    ts: str = Query(None)
+    ts: str = Query(None),
+    location: str = Query(None),
+    crop_type: str = Query(None),
+    farm_note: str = Query(None),
+    capture_mode: str = Query(None),
+    capture_input: str = Query(None)
 ):
     try:
         upload_id = str(uuid.uuid4())
@@ -105,6 +110,12 @@ async def upload_image(
         meta_path = os.path.join(UPLOAD_DIR, f"{upload_id}.json")
         with open(meta_path, "w", encoding="utf-8") as fmeta:
             json.dump({
+                "device_id": device_id,
+                "location": location,
+                "crop_type": crop_type,
+                "farm_note": farm_note,
+                "capture_mode": capture_mode,
+                "capture_input": capture_input,
                 "predicted_class": prediction.predicted_class,
                 "confidence": prediction.confidence,
                 "disease_rate": prediction.metadata.get("disease_rate", 0.0),
@@ -151,7 +162,12 @@ async def get_image_uploads(limit: int = 10):
                 except: pass
             uploads.append({
                 "upload_id": uid,
-                "device_id": "MOBILE-CAM",
+                "device_id": real_meta.get("device_id") or "MOBILE-CAM",
+                "location": real_meta.get("location") or "",
+                "crop_type": real_meta.get("crop_type") or "",
+                "farm_note": real_meta.get("farm_note") or "",
+                "capture_mode": real_meta.get("capture_mode") or "auto",
+                "capture_input": real_meta.get("capture_input") or "",
                 "captured_at": real_meta.get("captured_at") or mtime.isoformat() + "Z",
                 "upload_status": "inferred",
                 "predicted_class": real_meta.get("predicted_class") or "Healthy",
