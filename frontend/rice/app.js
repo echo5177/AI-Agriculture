@@ -162,7 +162,8 @@ window.openLiveCameraModal = () => {
     const iframe = document.getElementById('liveCameraIframe');
     if (m && iframe) {
         const did = encodeURIComponent(localStorage.getItem('device_id') || 'dev_mobile_live_01');
-        iframe.src = `/mobile_live_capture.html?device_id=${did}`;
+        const ts = new Date().getTime();
+        iframe.src = `/mobile_live_capture.html?device_id=${did}&v=${ts}`;
         m.classList.remove('opacity-0', 'pointer-events-none');
     }
 };
