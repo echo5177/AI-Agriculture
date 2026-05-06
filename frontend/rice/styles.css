@@ -1,18 +1,18 @@
 @layer utilities {
-  .glass { @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl; }
-  .glass-panel { @apply bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl; }
-  .input-focus { @apply focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none bg-white/5 border-white/20 text-white placeholder-gray-400; }
-  .nav-active { @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10; }
-  .text-glow { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+  .glass { @apply bg-white/40 backdrop-blur-lg border border-[#332b21]/10 shadow-xl; }
+  .glass-panel { @apply bg-white/70 backdrop-blur-2xl border border-[#332b21]/10 shadow-[0_8px_32px_rgba(51,43,33,0.05)] rounded-3xl; }
+  .input-focus { @apply focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 focus:outline-none bg-white/50 border-[#332b21]/10 text-[#332b21] placeholder-[#332b21]/40 transition-all; }
+  .nav-active { @apply bg-emerald-600/10 text-emerald-700 border border-emerald-600/20 shadow-[0_0_20px_rgba(5,150,105,0.1)]; }
+  .text-glow { text-shadow: 0 0 15px rgba(5, 150, 105, 0.2); }
 }
 
 :root {
-  --sidebar-w: 80px;
-  --sidebar-expanded-w: 200px;
+  --sidebar-w: 0px;
+  --sidebar-expanded-w: 0px;
   --panel-left-w: 380px;
-  --glass-bg: rgba(30, 41, 59, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --accent-glow: rgba(52, 211, 153, 0.25);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(51, 43, 33, 0.1);
+  --accent-glow: rgba(5, 150, 105, 0.15);
 }
 
 #main-content {
