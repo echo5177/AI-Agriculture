@@ -43,6 +43,8 @@ window.I18N = (() => {
             mobile_uploading_for: '正在上传到设备', mobile_upload_success: '上传成功', mobile_upload_failed: '上传失败',
             mobile_live_poc: '实时摄像头 PoC',
             mobile_live_poc_desc: '打开实时摄像头抓帧上传页面',
+            live_shoot: '实时拍摄',
+            start_loop_capture: '开始循环抓拍',
             accepted: '已接收',
         },
         en: {
@@ -83,6 +85,8 @@ window.I18N = (() => {
             mobile_uploading_for: 'Uploading for', mobile_upload_success: 'Upload success', mobile_upload_failed: 'Upload failed',
             mobile_live_poc: 'Live Camera PoC',
             mobile_live_poc_desc: 'Open real-time camera frame upload page',
+            live_shoot: 'Live Capture',
+            start_loop_capture: 'Start Loop Capture',
             accepted: 'accepted',
         },
         ms: {
@@ -123,6 +127,8 @@ window.I18N = (() => {
             mobile_uploading_for: 'Memuat naik untuk', mobile_upload_success: 'Muat naik berjaya', mobile_upload_failed: 'Muat naik gagal',
             mobile_live_poc: 'PoC Kamera Langsung',
             mobile_live_poc_desc: 'Buka halaman muat naik bingkai kamera masa nyata',
+            live_shoot: 'Tangkapan Langsung',
+            start_loop_capture: 'Mula Tangkapan Gelung',
             accepted: 'diterima',
         },
     };
