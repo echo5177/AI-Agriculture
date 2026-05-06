@@ -1,4 +1,4 @@
-﻿/**
+/**
  * App Orchestrator
  * Entry point that initializes modules and manages the data loop.
  */
@@ -155,4 +155,21 @@ window.closeModal = () => {
         fallback.classList.remove('flex');
     }
     if (m) m.classList.add('opacity-0', 'pointer-events-none');
+};
+
+window.openLiveCameraModal = () => {
+    const m = document.getElementById('liveCameraModal');
+    const iframe = document.getElementById('liveCameraIframe');
+    if (m && iframe) {
+        const did = encodeURIComponent(localStorage.getItem('device_id') || 'dev_mobile_live_01');
+        iframe.src = `/mobile_live_capture.html?device_id=${did}`;
+        m.classList.remove('opacity-0', 'pointer-events-none');
+    }
+};
+
+window.closeLiveCameraModal = () => {
+    const m = document.getElementById('liveCameraModal');
+    const iframe = document.getElementById('liveCameraIframe');
+    if (m) m.classList.add('opacity-0', 'pointer-events-none');
+    if (iframe) iframe.src = ''; // Clear src to stop camera stream
 };

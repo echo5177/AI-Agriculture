@@ -88,14 +88,12 @@
                               </div>
                               <p id="mobileUploadFileName" class="text-[11px] text-[#332b21]/80 mb-3 font-mono truncate" data-i18n="no_image_selected">No image selected</p>
                               <div class="mb-3">
-                                  <a id="mobileLivePocLink"
-                                     href="/mobile_live_capture.html"
-                                     target="_blank"
-                                     rel="noopener noreferrer"
+                                  <button id="mobileLivePocBtn"
+                                     onclick="window.openLiveCameraModal()"
                                      class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-600/10 border border-violet-600/20 text-xs text-violet-800 font-bold hover:bg-violet-600/20 transition-all">
                                       <i class="fa fa-video-camera"></i>
                                       <span data-i18n="mobile_live_poc">Live Camera PoC</span>
-                                  </a>
+                                  </button>
                                   <span class="ml-2 text-[10px] text-[#332b21]/60" data-i18n="mobile_live_poc_desc">Open real-time camera frame upload page</span>
                               </div>
                               <div class="aspect-video bg-black/40 rounded-xl overflow-hidden border border-white/10 relative mb-3">
@@ -139,6 +137,21 @@
           </div>
           <div class="p-4 bg-black/40 text-center">
               <img id="modalImage" src="" alt="image preview" class="max-w-full h-auto mx-auto rounded-xl shadow-2xl" />
+          </div>
+      </div>
+  </div>
+
+  <!-- Live Camera Modal -->
+  <div id="liveCameraModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-md bg-black/60">
+      <div class="glass-panel w-full max-w-5xl h-[85vh] flex flex-col relative overflow-hidden shadow-2xl">
+          <div class="flex items-center justify-between p-4 border-b border-[#332b21]/10 bg-[#fcf5e5]">
+              <h3 class="text-lg font-bold text-[#332b21] flex items-center gap-2"><i class="fa fa-video-camera text-violet-600"></i><span data-i18n="mobile_live_poc">Live Camera PoC</span></h3>
+              <button onclick="window.closeLiveCameraModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#332b21]/5 text-[#332b21]/60 hover:bg-rose-500 hover:text-white transition-colors">
+                  <i class="fa fa-times"></i>
+              </button>
+          </div>
+          <div class="flex-1 w-full bg-[#081426]">
+              <iframe id="liveCameraIframe" src="" class="w-full h-full border-none" allow="camera"></iframe>
           </div>
       </div>
   </div>
