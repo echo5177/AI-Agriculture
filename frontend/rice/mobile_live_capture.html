@@ -4,48 +4,55 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mobile Live Capture PoC</title>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #081426; color: #e6f2ff; }
+    body { margin: 0; font-family: 'Outfit', 'Inter', sans-serif; background: #fcf5e5; color: #332b21; }
     .wrap { max-width: 980px; margin: 0 auto; padding: 14px; }
-    .card { background: #0f2138; border: 1px solid #1f3659; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
-    input, button { border-radius: 8px; border: 1px solid #2b476f; background: #0b1a30; color: #e6f2ff; padding: 8px 10px; }
+    .card { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(51, 43, 33, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(51, 43, 33, 0.05); backdrop-filter: blur(8px); }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 13px; font-weight: 600; }
+    input, button { border-radius: 8px; border: 1px solid rgba(51, 43, 33, 0.2); background: rgba(255, 255, 255, 0.8); color: #332b21; padding: 8px 12px; font-family: inherit; font-size: 13px; transition: all 0.2s; }
+    input:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1); }
     input { min-width: 120px; }
-    button { cursor: pointer; }
-    button.primary { background: #1f8f5f; border-color: #2ca16f; }
-    button.warn { background: #8f2f2f; border-color: #af4242; }
-    #preview { width: 100%; max-height: 55vh; background: #000; border-radius: 8px; }
-    #log { white-space: pre-wrap; font-size: 12px; line-height: 1.35; background: #061221; border-radius: 8px; padding: 10px; min-height: 120px; max-height: 260px; overflow: auto; }
-    .muted { opacity: 0.85; font-size: 12px; }
+    button { cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    button:hover { background: #fcf5e5; }
+    button.primary { background: #059669; border-color: #047857; color: white; }
+    button.primary:hover { background: #047857; }
+    button.warn { background: #e11d48; border-color: #be123c; color: white; }
+    button.warn:hover { background: #be123c; }
+    #preview { width: 100%; max-height: 55vh; background: #1e293b; border-radius: 8px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    #log { white-space: pre-wrap; font-size: 12px; line-height: 1.4; background: rgba(51, 43, 33, 0.05); border: 1px solid rgba(51, 43, 33, 0.1); border-radius: 8px; padding: 12px; min-height: 120px; max-height: 260px; overflow: auto; font-family: monospace; }
+    .muted { opacity: 0.7; font-size: 12px; font-weight: 400; }
+    label { display: flex; align-items: center; gap: 6px; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h3 style="margin: 0 0 8px 0;">Issue #62 Mobile Live Camera PoC</h3>
-      <div class="muted">手机实时取景 -> 周期抓帧 -> 上传 /api/v1/image/upload -> 云端推理</div>
+      <h3 style="margin: 0 0 8px 0; color: #332b21;"><i class="fa fa-video-camera" style="color: #8b5cf6; margin-right: 8px;"></i><span data-i18n="mobile_live_poc">Live Camera PoC</span></h3>
+      <div class="muted" data-i18n="mobile_live_poc_desc">Open real-time camera frame upload page</div>
     </div>
 
     <div class="card">
       <div class="row">
-        <label>device_id <input id="deviceId" /></label>
-        <label>location <input id="location" value="mobile_live" /></label>
-        <label>crop_type <input id="cropType" value="rice" /></label>
+        <label>Device ID <input id="deviceId" /></label>
+        <label>Location <input id="location" value="mobile_live" /></label>
+        <label>Crop Type <input id="cropType" value="rice" /></label>
       </div>
       <div class="row">
-        <label>farm_note <input id="farmNote" value="issue62-live-camera" style="min-width: 220px;" /></label>
-        <label>interval(s) <input id="intervalSec" type="number" min="0.2" step="0.1" value="2.0" /></label>
-        <label>endpoint <input id="endpoint" value="/api/v1/image/upload" style="min-width: 220px;" /></label>
+        <label>Note <input id="farmNote" value="live-camera" style="min-width: 180px;" /></label>
+        <label>Interval(s) <input id="intervalSec" type="number" min="0.2" step="0.1" value="2.0" style="width: 70px;" /></label>
+        <label>Endpoint <input id="endpoint" value="/api/v1/image/upload" style="min-width: 200px;" /></label>
       </div>
-      <div class="row">
-        <button id="startCam" class="primary">启动摄像头</button>
-        <button id="startLoop" class="primary">开始循环上传</button>
-        <button id="stopLoop" class="warn">停止</button>
-        <span id="stats" class="muted">sent=0 ok=0 fail=0</span>
+      <div class="row" style="margin-top: 16px;">
+        <button id="startCam" class="primary"><i class="fa fa-camera"></i> <span data-i18n="mobile_camera">Camera</span></button>
+        <button id="startLoop" class="primary"><i class="fa fa-refresh"></i> <span data-i18n="sys_running">System Running</span> (Loop)</button>
+        <button id="stopLoop" class="warn"><i class="fa fa-stop"></i> <span data-i18n="mobile_clear">Clear</span></button>
+        <span id="stats" class="muted" style="margin-left: auto; font-family: monospace; font-weight: bold;">sent=0 ok=0 fail=0</span>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="padding: 8px;">
       <video id="preview" autoplay muted playsinline></video>
       <canvas id="canvas" style="display:none;"></canvas>
     </div>
@@ -55,6 +62,7 @@
     </div>
   </div>
 
+  <script src="i18n.js?v=1.1"></script>
   <script>
     const q = new URLSearchParams(location.search);
     const $ = (id) => document.getElementById(id);
