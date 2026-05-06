@@ -35,30 +35,32 @@
   </div>
 
   <div id="main-content" class="min-h-screen">
-      <!-- Top Navigation (Now within main-content) -->
-      <header class="glass-panel sticky top-4 mx-4 md:mx-8 z-50 flex items-center justify-between px-6 py-4">
-          <div class="flex items-center gap-4">
-              <h1 class="text-xl font-bold text-[#332b21] tracking-wide">Smart Farm <span class="text-emerald-700 font-light">AI-Inference</span></h1>
-              <p class="text-xs text-[#332b21]/50"><i class="fa fa-circle text-emerald-600 animate-pulse text-[8px] mr-1"></i><span data-i18n="sys_running">推理引擎就绪</span></p>
+      <!-- Floating Controls -->
+      <div class="fixed top-4 right-4 md:right-8 z-50 glass-panel flex items-center gap-4 px-4 py-2 shadow-lg">
+          <div class="hidden md:flex flex-col items-end">
+              <span id="clock" class="text-xs text-[#332b21]/60 font-mono">00:00:00</span>
           </div>
-          <div class="flex items-center gap-6">
-              <div class="hidden md:flex flex-col items-end">
-                  <span id="clock" class="text-xs text-[#332b21]/60 font-mono">00:00:00</span>
+          <div class="relative group cursor-pointer">
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#332b21]/5 border border-[#332b21]/10 hover:bg-[#332b21]/10 transition-colors">
+                  <i class="fa fa-globe text-emerald-700 text-sm"></i>
+                  <span class="text-xs font-bold text-[#332b21]/80 uppercase" id="currentLangDisplay">ZH</span>
+                  <i class="fa fa-chevron-down text-[8px] text-[#332b21]/40"></i>
               </div>
-              <div class="relative group cursor-pointer">
-                  <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#332b21]/5 border border-[#332b21]/10 hover:bg-[#332b21]/10 transition-colors">
-                      <i class="fa fa-globe text-emerald-700 text-sm"></i>
-                      <span class="text-xs font-bold text-[#332b21]/80 uppercase" id="currentLangDisplay">ZH</span>
-                      <i class="fa fa-chevron-down text-[8px] text-[#332b21]/40"></i>
-                  </div>
-                  <div class="absolute right-0 top-full mt-2 w-32 bg-slate-800 border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right z-50">
-                      <div class="p-1.5 flex flex-col gap-1">
-                          <button onclick="window.I18N.setLanguage('zh'); document.getElementById('currentLangDisplay').textContent='ZH'" class="text-left w-full px-3 py-2 text-xs text-slate-300 hover:text-emerald-400 hover:bg-white/5 rounded-lg transition-colors font-medium">ZH - 中文</button>
-                          <button onclick="window.I18N.setLanguage('en'); document.getElementById('currentLangDisplay').textContent='EN'" class="text-left w-full px-3 py-2 text-xs text-slate-300 hover:text-emerald-400 hover:bg-white/5 rounded-lg transition-colors font-medium">EN - English</button>
-                          <button onclick="window.I18N.setLanguage('ms'); document.getElementById('currentLangDisplay').textContent='MS'" class="text-left w-full px-3 py-2 text-xs text-slate-300 hover:text-emerald-400 hover:bg-white/5 rounded-lg transition-colors font-medium">MS - Melayu</button>
-                      </div>
+              <div class="absolute right-0 top-full mt-2 w-32 bg-[#fcf5e5] border border-[#332b21]/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right z-50">
+                  <div class="p-1.5 flex flex-col gap-1">
+                      <button onclick="window.I18N.setLanguage('zh'); document.getElementById('currentLangDisplay').textContent='ZH'" class="text-left w-full px-3 py-2 text-xs text-[#332b21]/80 hover:text-emerald-700 hover:bg-[#332b21]/5 rounded-lg transition-colors font-medium">ZH - 中文</button>
+                      <button onclick="window.I18N.setLanguage('en'); document.getElementById('currentLangDisplay').textContent='EN'" class="text-left w-full px-3 py-2 text-xs text-[#332b21]/80 hover:text-emerald-700 hover:bg-[#332b21]/5 rounded-lg transition-colors font-medium">EN - English</button>
+                      <button onclick="window.I18N.setLanguage('ms'); document.getElementById('currentLangDisplay').textContent='MS'" class="text-left w-full px-3 py-2 text-xs text-[#332b21]/80 hover:text-emerald-700 hover:bg-[#332b21]/5 rounded-lg transition-colors font-medium">MS - Melayu</button>
                   </div>
               </div>
+          </div>
+      </div>
+
+      <!-- Static Branding -->
+      <header class="mx-4 md:mx-8 pt-8 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+              <h1 class="text-2xl font-bold text-[#332b21] tracking-wide">Smart Farm <span class="text-emerald-700 font-light">AI-Inference</span></h1>
+              <p class="text-xs text-[#332b21]/50"><i class="fa fa-circle text-emerald-600 animate-pulse text-[8px] mr-1"></i><span data-i18n="sys_running">推理引擎就绪</span></p>
           </div>
       </header>
           <!-- VIEW: Home (Dashboard) -->
