@@ -24,8 +24,24 @@
    ```
 
 4. **访问系统**：
-   - **主仪表盘**: [http://localhost:8000/rice_dashboard.html](http://localhost:8000/rice_dashboard.html)
-   - **实时摄像头页面**: [http://localhost:8000/mobile_live_capture.html](http://localhost:8000/mobile_live_capture.html)
+   - **主仪表盘**: [http://localhost:8000](http://localhost:8000)
+   - **手机端访问**: 请查看下方 [手机端使用指南](#手机端使用指南)。
+
+## 手机端使用指南
+
+通过手机使用本项目可以获得最真实的“田间实时诊断”体验。
+
+1. **同一网络**：确保你的手机和电脑连接在**同一个 Wi-Fi** 下。
+2. **获取电脑 IP**：
+   - 在电脑终端运行 `ipconfig`。
+   - 找到 `无线局域网适配器 Wi-Fi` 下的 `IPv4 地址`（通常是 `192.168.x.x` 或 `10.x.x.x`）。
+3. **手机访问**：
+   - 打开手机浏览器（Chrome 或 Safari）。
+   - 输入：`http://你的电脑IP:8000` (例如 `http://192.168.1.10:8000`)。
+4. **实时 AI 诊断**：
+   - 点击主页上的 **“实时摄像头 PoC”** 按钮。
+   - 在弹出的米黄色窗口中点击“启动摄像头”。
+   - 点击“开始循环抓拍”，手机拍摄到的画面将实时传输回电脑后端，并自动完成 AI 病害推理。
 
 ## 目录结构
 - `ai_engine/`：后端推理服务逻辑（FastAPI）。
