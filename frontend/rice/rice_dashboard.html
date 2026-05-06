@@ -77,37 +77,37 @@
                               <input id="mobileUploadCameraInput" type="file" accept="image/*,.jpg,.jpeg,.png,.heic,.heif" capture="environment" class="hidden" />
                               <input id="mobileUploadFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.heic,.heif" class="hidden" />
                               <div class="mobile-upload-actions mb-3">
-                                  <button id="mobileUploadCameraBtn" class="px-3 py-2 rounded-lg bg-sky-500/20 border border-sky-400/30 text-xs text-sky-100 hover:bg-sky-500/30 transition-all">
+                                  <button id="mobileUploadCameraBtn" class="px-3 py-2 rounded-lg bg-sky-600/10 border border-sky-600/20 text-xs text-sky-800 font-bold hover:bg-sky-600/20 transition-all">
                                       <i class="fa fa-camera mr-1"></i><span data-i18n="mobile_camera">Camera</span>
                                   </button>
-                                  <button id="mobileUploadAlbumBtn" class="px-3 py-2 rounded-lg bg-white/10 border border-white/15 text-xs text-slate-100 hover:bg-white/20 transition-all">
+                                  <button id="mobileUploadAlbumBtn" class="px-3 py-2 rounded-lg bg-amber-600/10 border border-amber-600/20 text-xs text-amber-900 font-bold hover:bg-amber-600/20 transition-all">
                                       <i class="fa fa-image mr-1"></i><span data-i18n="mobile_album">Album</span>
                                   </button>
-                                  <button id="mobileUploadClearBtn" class="px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-xs text-slate-300 hover:text-white transition-all" data-i18n="mobile_clear">Clear</button>
-                                  <button id="mobileUploadSubmitBtn" class="px-3 py-2 rounded-lg bg-emerald-600/80 border border-emerald-400/30 text-xs text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all" disabled data-i18n="mobile_upload">Upload</button>
+                                  <button id="mobileUploadClearBtn" class="px-3 py-2 rounded-lg bg-rose-600/10 border border-rose-600/20 text-xs text-rose-800 font-bold hover:bg-rose-600/20 transition-all" data-i18n="mobile_clear">Clear</button>
+                                  <button id="mobileUploadSubmitBtn" class="px-3 py-2 rounded-lg bg-emerald-600 border border-emerald-700 text-xs text-white font-bold shadow-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all" disabled data-i18n="mobile_upload">Upload</button>
                               </div>
-                              <p id="mobileUploadFileName" class="text-[11px] text-slate-400 mb-3 font-mono truncate" data-i18n="no_image_selected">No image selected</p>
+                              <p id="mobileUploadFileName" class="text-[11px] text-[#332b21]/80 mb-3 font-mono truncate" data-i18n="no_image_selected">No image selected</p>
                               <div class="mb-3">
                                   <a id="mobileLivePocLink"
                                      href="/mobile_live_capture.html"
                                      target="_blank"
                                      rel="noopener noreferrer"
-                                     class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-500/20 border border-violet-400/30 text-xs text-violet-100 hover:bg-violet-500/30 transition-all">
+                                     class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-600/10 border border-violet-600/20 text-xs text-violet-800 font-bold hover:bg-violet-600/20 transition-all">
                                       <i class="fa fa-video-camera"></i>
                                       <span data-i18n="mobile_live_poc">Live Camera PoC</span>
                                   </a>
-                                  <span class="ml-2 text-[10px] text-slate-500" data-i18n="mobile_live_poc_desc">Open real-time camera frame upload page</span>
+                                  <span class="ml-2 text-[10px] text-[#332b21]/60" data-i18n="mobile_live_poc_desc">Open real-time camera frame upload page</span>
                               </div>
                               <div class="aspect-video bg-black/40 rounded-xl overflow-hidden border border-white/10 relative mb-3">
                                   <img id="mobileUploadPreview" src="" alt="preview" class="hidden w-full h-full object-cover" />
                                   <div id="mobileUploadPreviewEmpty" class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs" data-i18n="waiting_image">Waiting image...</div>
                               </div>
-                              <div class="w-full bg-black/30 rounded-full h-1.5 overflow-hidden border border-white/10">
+                              <div class="w-full bg-[#332b21]/10 rounded-full h-1.5 overflow-hidden border border-[#332b21]/10">
                                   <div id="mobileUploadProgressBar" class="h-full bg-emerald-400 transition-all" style="width:0%"></div>
                               </div>
                               <div class="flex items-center justify-between mt-2">
-                                  <p id="mobileUploadStatus" class="text-[11px] text-slate-400" data-i18n="upload_ready">等待上传。</p>
-                                  <span id="mobileUploadProgressText" class="text-[10px] text-slate-500 font-mono">0%</span>
+                                  <p id="mobileUploadStatus" class="text-[11px] text-[#332b21] font-bold" data-i18n="upload_ready">等待上传。</p>
+                                  <span id="mobileUploadProgressText" class="text-[10px] text-emerald-800 font-black font-mono">0%</span>
                               </div>
                           </div>
 
