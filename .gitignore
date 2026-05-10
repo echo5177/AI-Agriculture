@@ -67,3 +67,8 @@ image_uploads/
 /cloud/data/
 /cloud/state/
 
+# --- Object Detection (YOLO) & Datasets ---
+RiceLeafAnnotatedDataset/
+runs/
+yolov8*.pt
+yolo11*.pt
