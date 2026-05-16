@@ -17,3 +17,4 @@ scikit-learn
 tqdm
 matplotlib
 pandas
+ultralytics           # YOLOv8 object detection
