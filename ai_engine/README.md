@@ -1,6 +1,6 @@
-# AI Engine (AIT103 Academic Prototype)
+# AI Engine (智慧农业 AI 推理引擎)
 
-本项目是 AI-Agriculture 平台的轻量化 AI 推理引擎原型，专门针对 AIT103 学术演示进行了“瘦身”优化。它移除了复杂的云端网关和数据库依赖，实现了本地化的图片上传、AI 诊断及结果持久化。
+本项目是 AI-Agriculture 平台的 AI 推理引擎，采用**双模型架构**——基于 YOLOv8 的目标检测器（主力）和轻量级分类器（兜底），实现了本地化的图片上传、AI 诊断及结果持久化。
 
 ## 目录结构
 
@@ -10,19 +10,44 @@ ai_engine/
 └── crops/                           # 核心识别逻辑
     └── rice/
         └── inference/
-            ├── api.py               # 单文件逻辑核心：包含所有接口、校验与 Mock 逻辑
-            └── rice_leaf_classifier.py  # 水稻病害 AI 分类器
+            ├── api.py               # 单文件逻辑核心：包含所有接口、校验与推理调度
+            ├── yolo_detector.py     # [NEW] YOLOv8 目标检测器（BSR 后端渲染）
+            └── rice_leaf_classifier.py  # 轻量级分类器（兜底/边缘端）
 local_data/
 └── uploads/                         # 本地存储：保存图片及 .json 元数据
+models/
+├── yolov8_rice_leaf.pt              # [NEW] YOLO 检测模型权重
+└── rice/rice_leaf_classifier/       # 传统分类器权重
 ```
 
-## 核心功能：识别与存储闭环
+## 核心架构：BSR（Backend-Side Rendering）
 
-在演示版本中，我们实现了**无数据库持久化方案**：
-1.  **上传存储**：前端上传的图片保存至 `local_data/uploads/`，文件名使用 UUID。
-2.  **实时推理**：保存成功后立即调用 `RiceLeafClassifier` 进行病害识别。
-3.  **结果固化**：推理结果（类别、置信度、时间戳）会被写入同名的 `.json` 元数据文件中。
-4.  **历史回显**：诊断记录接口（`/api/v1/image/uploads`）会扫描该目录并读取 `.json` 文件，确保刷新页面后识别结果不丢失。
+本系统采用**后端渲染**策略处理 BBox 检测框：
+
+1. **上传存储**：前端上传的图片保存至 `local_data/uploads/`，文件名使用 UUID。
+2. **YOLO 检测**：保存成功后立即调用 `YoloDetector` 进行目标检测，精确定位每一个病斑。
+3. **后端画框**：YOLO 推理完毕后，检测框（BBox）、类别标签和置信度**直接由后端画在图片上**（使用 Ultralytics 内置渲染器），生成一张"带框注释图"。
+4. **替换存储**：将原始上传图替换为带框版本。前端在展示时，拉取到的已经是一张包含所有红绿色检测框的完整图片，**无需任何前端 JS 修改**。
+5. **结果固化**：推理结果（类别、置信度、病斑数量、时间戳）写入同名 `.json` 元数据文件。
+6. **历史回显**：诊断记录接口扫描目录并读取 `.json` 文件，确保刷新页面后识别结果不丢失。
+
+### 为什么选择 BSR？
+- **零前端改造**：不需要在手机端和 PC 端浏览器中编写复杂的 Canvas 坐标缩放逻辑。
+- **所见即所得**：用户在仪表盘上看到的图片就是最终的检测结果，截图直接可用于报告和 PPT。
+- **工业级标准**：这也是物联网边缘计算场景中常用的"服务端渲染"方案。
+
+## 推理优先级
+
+```
+用户上传图片
+     │
+     ▼
+YOLO 检测器是否已加载？
+     ├── 是 → 运行 YOLO 目标检测 + BSR 画框  [优先]
+     └── 否 → 分类器是否已加载？
+                ├── 是 → 运行传统分类（无 BBox）
+                └── 否 → 返回 Mock 数据（演示兜底）
+```
 
 ## API 说明
 
@@ -30,9 +55,9 @@ local_data/
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| **POST** | `/api/v1/image/upload` | **上传并识别**。接收图片，保存并返回 AI 推理结果。 |
-| **GET** | `/api/v1/image/file` | **获取图片**。根据 `upload_id` 返回图片二进制流。 |
-| **GET** | `/api/v1/image/uploads` | **诊断记录**。返回最近上传的识别历史（混合真实与 Mock 数据）。 |
+| **POST** | `/api/v1/image/upload` | **上传并识别**。接收图片，YOLO 检测后返回带框图片和推理结果。 |
+| **GET** | `/api/v1/image/file` | **获取图片**。根据 `upload_id` 返回带检测框的图片。 |
+| **GET** | `/api/v1/image/uploads` | **诊断记录**。返回最近上传的识别历史。 |
 
 ### 模型与健康检查
 
@@ -40,7 +65,6 @@ local_data/
 |------|------|------|
 | GET | `/api/v1/health` | 基础服务健康检查 |
 | GET | `/api/v1/rice/health` | 水稻识别模型加载状态检查 |
-| POST | `/api/v1/rice/predict` | 原始推理接口（仅推理，不保存） |
 
 ## 快速启动
 
@@ -58,7 +82,8 @@ python -m ai_engine.main
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `MODEL_CHECKPOINT_PATH` | 模型权重路径 | `models/rice/rice_leaf_classifier/best_model.pth` |
+| `YOLO_MODEL_PATH` | YOLO 检测模型权重路径 | `models/yolov8_rice_leaf.pt` |
+| `MODEL_CHECKPOINT_PATH` | 传统分类器权重路径 | `models/rice/rice_leaf_classifier/best_model.pth` |
 | `MODEL_ADVICE_FILE` | 病害处理建议映射表 | `models/rice/rice_leaf_classifier/advice_map.yaml` |
 
 ---

@@ -87,11 +87,23 @@ python scripts/train_yolo.py --batch 8
 copy runs\detect\train\weights\best.pt models\yolov8_rice_leaf.pt
 ```
 
+## 技术架构：BSR（Backend-Side Rendering）
+
+系统采用**后端渲染**策略处理目标检测结果：
+
+```
+用户上传/摄像头拍摄 → 后端 YOLO 推理 → 后端画检测框 → 带框图片返回前端展示
+```
+
+- **零前端改造**：检测框由 Python 后端直接画在图片上，前端只需展示一张普通图片。
+- **双模型容错**：YOLO 检测器优先加载；若权重文件缺失，自动降级到传统分类器。
+- **所见即所得**：仪表盘上看到的图片即为最终检测结果，可直接截图用于报告。
+
 ## 目录结构
 
-- `ai_engine/`：后端推理服务逻辑（FastAPI）。
+- `ai_engine/`：后端推理服务逻辑（FastAPI + YOLO + BSR 渲染）。
 - `frontend/rice/`：系统前端代码，包含仪表盘与摄像头采集页面。
-- `models/`：AI 模型权重文件（分类器 + YOLO 检测器）。
+- `models/`：AI 模型权重文件（`yolov8_rice_leaf.pt` + 传统分类器）。
 - `scripts/`：训练脚本，包含 `train_yolo.py`（YOLO 目标检测训练）。
 - `RiceLeafAnnotatedDataset/`：YOLO 格式标注数据集（train/valid/test）。
 - `local_data/`：运行时本地存储（上传图片与 JSON 元数据）。
