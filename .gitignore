@@ -72,3 +72,5 @@ RiceLeafAnnotatedDataset/
 runs/
 yolov8*.pt
 yolo11*.pt
+all_runs_backup/
+*.zip
