@@ -50,14 +50,26 @@ class PredictionResponse(BaseModel):
 
 router = APIRouter()
 _classifier = None
+_yolo_detector = None
 
 def set_classifier(classifier) -> None:
     global _classifier
     _classifier = classifier
 
-def _predict(image_bytes: bytes) -> PredictionResponse:
+def set_yolo_detector(detector) -> None:
+    """Register a YoloDetector instance for object-detection inference."""
+    global _yolo_detector
+    _yolo_detector = detector
+
+def _predict(image_bytes: bytes) -> tuple[PredictionResponse, bytes | None]:
+    """Run inference and return (response, annotated_image_bytes_or_None)."""
     validate_image_bytes(image_bytes)
-    if _classifier is not None:
+    annotated_bytes = None
+
+    if _yolo_detector is not None:
+        raw = _yolo_detector.predict_bytes(image_bytes)
+        annotated_bytes = raw.pop("annotated_bytes", None)
+    elif _classifier is not None:
         raw = _classifier.predict_bytes(image_bytes)
     else:
         raw = {
@@ -67,13 +79,14 @@ def _predict(image_bytes: bytes) -> PredictionResponse:
             "topk": [{"predicted_class": "Healthy", "confidence": 0.82}],
             "metadata": {"advice_code": "normal_monitoring", "disease_rate": 0.12, "is_diseased": False},
         }
-    return PredictionResponse(
+    response = PredictionResponse(
         predicted_class=raw["predicted_class"],
         confidence=raw["confidence"],
         model_version=raw["model_version"],
         topk=raw.get("topk", []),
         metadata=raw.get("metadata", {}),
     )
+    return response, annotated_bytes
 
 # ------------------------------------------------------------------
 # 3. Core API Endpoints (Inference & Storage)
@@ -104,7 +117,17 @@ async def upload_image(
         with open(file_path, "rb") as f:
             image_bytes = f.read()
         
-        prediction = _predict(image_bytes)
+        prediction, annotated_bytes = _predict(image_bytes)
+
+        # BSR: overwrite the saved image with the annotated version
+        if annotated_bytes is not None:
+            annotated_path = os.path.join(UPLOAD_DIR, f"{upload_id}.jpg")
+            with open(annotated_path, "wb") as fa:
+                fa.write(annotated_bytes)
+            # Remove the original file if extension differs (e.g. .png)
+            if ext.lower() != ".jpg" and os.path.exists(file_path):
+                os.remove(file_path)
+            file_path = annotated_path
         
         # Save Metadata
         meta_path = os.path.join(UPLOAD_DIR, f"{upload_id}.json")

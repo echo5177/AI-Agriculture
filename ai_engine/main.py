@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, RedirectResponse
 
 # Consolidated import: all inference/storage logic is here
-from ai_engine.crops.rice.inference.api import router, set_classifier, ImageLoadError
+from ai_engine.crops.rice.inference.api import router, set_classifier, set_yolo_detector, ImageLoadError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,13 +26,29 @@ MODEL_CHECKPOINT_PATH = os.environ.get("MODEL_CHECKPOINT_PATH", "models/rice/ric
 MODEL_LABELS_FILE = os.environ.get("MODEL_LABELS_FILE", "models/rice/rice_leaf_classifier/labels.json")
 MODEL_CONFIG_FILE = os.environ.get("MODEL_CONFIG_FILE", "models/rice/rice_leaf_classifier/config.yaml")
 MODEL_ADVICE_FILE = os.environ.get("MODEL_ADVICE_FILE", "models/rice/rice_leaf_classifier/advice_map.yaml")
+YOLO_MODEL_PATH = os.environ.get("YOLO_MODEL_PATH", "models/yolov8_rice_leaf.pt")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("=== Smart Farm AI Engine Starting (AIT103 Prototype) ===")
+
+    # --- Priority 1: YOLO Object Detector ---
+    try:
+        if os.path.exists(YOLO_MODEL_PATH):
+            from ai_engine.crops.rice.inference.yolo_detector import YoloDetector
+            logger.info("Loading YOLO model from: %s", YOLO_MODEL_PATH)
+            detector = YoloDetector(model_path=YOLO_MODEL_PATH)
+            set_yolo_detector(detector)
+            logger.info("YOLO detector loaded successfully (%d classes).", len(detector.class_names))
+        else:
+            logger.warning("YOLO weights not found at %s – skipping.", YOLO_MODEL_PATH)
+    except Exception as exc:
+        logger.error("YOLO detector failed to load: %s", exc)
+
+    # --- Priority 2: Legacy Classifier (fallback) ---
     try:
         from ai_engine.crops.rice.inference.rice_leaf_classifier import RiceLeafClassifier
-        logger.info("Loading Rice Model Assets...")
+        logger.info("Loading legacy Rice Classifier...")
         classifier = RiceLeafClassifier(
             checkpoint_path=MODEL_CHECKPOINT_PATH,
             labels_file=MODEL_LABELS_FILE,
@@ -40,9 +56,10 @@ async def lifespan(app: FastAPI):
             advice_file=MODEL_ADVICE_FILE,
         )
         set_classifier(classifier)
-        logger.info("Rice model loaded successfully.")
+        logger.info("Legacy classifier loaded (fallback ready).")
     except Exception as exc:
-        logger.error("Rice model failed to load: %s", exc)
+        logger.error("Legacy classifier failed to load: %s", exc)
+
     yield
     logger.info("=== Smart Farm AI Engine Shutting Down ===")
 
