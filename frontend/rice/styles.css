@@ -555,6 +555,14 @@
   min-height: 260px;
 }
 
+.source-filter {
+  width: min(100%, 220px);
+}
+
+.diagnosis-image-frame {
+  height: 220px;
+}
+
 .diagnosis-scroll {
   scrollbar-gutter: stable;
 }
@@ -755,5 +763,9 @@
 
   .diagnosis-scroll {
     max-height: 420px !important;
+  }
+
+  .diagnosis-image-frame {
+    height: 190px;
   }
 }

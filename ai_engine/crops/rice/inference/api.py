@@ -168,12 +168,12 @@ async def get_image_file(upload_id: str = Query(None), saved_path: str = Query(N
     raise HTTPException(status_code=404, detail="Image not found")
 
 @router.get("/image/uploads")
-async def get_image_uploads(limit: int = 10):
+async def get_image_uploads(device_id: str = Query(None), limit: int = 10):
     uploads = []
     if os.path.exists(UPLOAD_DIR):
         files = [f for f in os.listdir(UPLOAD_DIR) if not f.endswith(".json")]
         files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(UPLOAD_DIR, x)), reverse=True)
-        for f in files[:limit]:
+        for f in files:
             uid = os.path.splitext(f)[0]
             mtime = datetime.fromtimestamp(os.path.getmtime(os.path.join(UPLOAD_DIR, f)))
             meta_path = os.path.join(UPLOAD_DIR, f"{uid}.json")
@@ -183,9 +183,12 @@ async def get_image_uploads(limit: int = 10):
                     with open(meta_path, "r", encoding="utf-8") as fm:
                         real_meta = json.load(fm)
                 except: pass
+            row_device_id = real_meta.get("device_id") or "MOBILE-CAM"
+            if device_id and row_device_id != device_id:
+                continue
             uploads.append({
                 "upload_id": uid,
-                "device_id": real_meta.get("device_id") or "MOBILE-CAM",
+                "device_id": row_device_id,
                 "location": real_meta.get("location") or "",
                 "crop_type": real_meta.get("crop_type") or "",
                 "farm_note": real_meta.get("farm_note") or "",
@@ -196,6 +199,8 @@ async def get_image_uploads(limit: int = 10):
                 "predicted_class": real_meta.get("predicted_class") or "Healthy",
                 "disease_rate": real_meta.get("disease_rate") or 0.1
             })
+            if len(uploads) >= limit:
+                break
     return uploads
 
 # ------------------------------------------------------------------

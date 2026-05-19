@@ -128,7 +128,12 @@
 
                           <div class="glass-panel p-6 flex flex-col">
                               <h2 class="text-sm font-bold text-[#332b21] mb-6 flex items-center gap-2 uppercase tracking-widest"><i class="fa fa-microchip text-rose-600"></i><span data-i18n="ai_feedback">AI 推理结果</span></h2>
-                              <div id="aiDiagnosisContainer" class="diagnosis-scroll flex-1 space-y-4 overflow-y-auto max-h-[360px] pr-2">
+                              <select id="aiDiagnosisSourceFilter" onchange="UI.setDiagnosisFilter(this.value)" class="source-filter mb-4 px-3 py-2 rounded-lg bg-white/70 border border-[#332b21]/10 text-xs text-[#332b21] font-bold">
+                                  <option value="all" data-i18n="result_filter_all">All</option>
+                                  <option value="snapshot" data-i18n="result_filter_snapshot">Snapshots</option>
+                                  <option value="upload" data-i18n="result_filter_upload">Uploads</option>
+                              </select>
+                              <div id="aiDiagnosisContainer" class="diagnosis-scroll flex-1 space-y-4 overflow-y-auto max-h-[520px] pr-2">
                                   <!-- Diagnosis Cards -->
                               </div>
                           </div>

@@ -6,6 +6,7 @@ window.UI = (() => {
     let envChart;
     let faultTrendChart;
     let latestImageUploads = [];
+    let diagnosisFilter = 'all';
 
     const formatDate = (ts) => {
         if (!ts) return '--';
@@ -196,6 +197,23 @@ window.UI = (() => {
         return 'auto';
     };
 
+    const inferCaptureInput = (row) => {
+        const explicit = `${row?.capture_input || ''}`.trim().toLowerCase();
+        if (explicit) return explicit;
+        const note = `${row?.farm_note || ''}`.toLowerCase();
+        const match = note.match(/capture_input=([^;|\s]+)/i);
+        if (match?.[1]) return match[1].toLowerCase();
+        return inferCaptureMode(row) === 'manual' ? 'upload' : 'auto';
+    };
+
+    const inferResultSource = (row) => {
+        const input = inferCaptureInput(row);
+        if (input === 'snapshot') return 'snapshot';
+        if (input === 'album' || input === 'camera' || input === 'upload') return 'upload';
+        if (input === 'live') return 'live';
+        return inferCaptureMode(row) === 'manual' ? 'upload' : 'auto';
+    };
+
     const renderDiagnosisCard = (r, captureMode) => {
         const state = r.upload_status || 'stored';
         const diseaseRate = typeof r.disease_rate === 'number' ? `${(r.disease_rate * 100).toFixed(1)}%` : '-';
@@ -208,7 +226,9 @@ window.UI = (() => {
         const modeClass = captureMode === 'manual'
             ? 'bg-sky-500/15 text-sky-300 border-sky-400/30'
             : 'bg-violet-500/15 text-violet-300 border-violet-400/30';
-        const modeLabel = captureMode === 'manual' ? 'MANUAL' : 'AUTO';
+        const source = inferResultSource(r);
+        const sourceLabel = source === 'snapshot' ? 'SNAPSHOT' : (source === 'upload' ? 'UPLOAD' : (source === 'live' ? 'LIVE' : 'AUTO'));
+        const modeLabel = captureMode === 'manual' ? sourceLabel : 'AUTO';
         const imgUrl = r.upload_id
             ? `/api/v1/image/file?upload_id=${encodeURIComponent(r.upload_id)}`
             : (r.saved_path ? `/api/v1/image/file?saved_path=${encodeURIComponent(r.saved_path)}` : '');
@@ -224,9 +244,9 @@ window.UI = (() => {
                 </div>
                 <h4 class="text-sm font-bold text-[#332b21] mb-1.5">${r.predicted_class || window.t('processing')}</h4>
                 <p class="text-[11px] text-[#332b21]/80 mb-2">${window.t('disease_rate')}: <span class="${card.text} font-semibold">${diseaseRate}</span></p>
-                <div class="h-28 w-full bg-[#332b21]/10 rounded-lg overflow-hidden border border-white/10 cursor-pointer" onclick="UI.openImagePreview('${imgUrl}', '${safeUploadId}')">
+                <div class="diagnosis-image-frame w-full bg-[#332b21]/10 rounded-lg overflow-hidden border border-white/10 cursor-pointer" onclick="UI.openImagePreview('${imgUrl}', '${safeUploadId}')">
                     ${imgUrl
-                        ? `<img src="${imgUrl}" alt="${safeUploadId}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center text-xs text-slate-500&quot;>${window.t('img_fail')}</div>';" />`
+                        ? `<img src="${imgUrl}" alt="${safeUploadId}" class="w-full h-full object-contain bg-black" onerror="this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center text-xs text-slate-500&quot;>${window.t('img_fail')}</div>';" />`
                         : '<div class="w-full h-full flex items-center justify-center text-xs text-slate-500">' + window.t('no_data') + '</div>'}
                 </div>
             </div>
@@ -244,27 +264,16 @@ window.UI = (() => {
             return;
         }
 
-        const manualRows = latestImageUploads.filter((row) => inferCaptureMode(row) === 'manual');
-        const autoRows = latestImageUploads.filter((row) => inferCaptureMode(row) !== 'manual');
-        const sectionHtml = (title, icon, rows, mode) => `
-            <div class="border border-white/10 rounded-xl p-3 bg-[#332b21]/5">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-[10px] uppercase tracking-widest font-bold text-[#332b21] flex items-center gap-2">
-                        <i class="fa ${icon}"></i>${title}
-                    </h4>
-                    <span class="text-[10px] text-[#332b21]/60 font-mono">${rows.length}</span>
-                </div>
-                ${
-                    rows.length
-                        ? rows.slice(0, 6).map((row) => renderDiagnosisCard(row, mode)).join('')
-                        : `<div class="text-[11px] text-slate-500 p-3 text-center">${window.t('no_data')}</div>`
-                }
-            </div>
-        `;
-        aiContainer.innerHTML = [
-            sectionHtml('Manual Capture', 'fa-mobile', manualRows, 'manual'),
-            sectionHtml('Auto Pipeline', 'fa-random', autoRows, 'auto'),
-        ].join('');
+        const select = document.getElementById('aiDiagnosisSourceFilter');
+        if (select && select.value !== diagnosisFilter) select.value = diagnosisFilter;
+        const rows = latestImageUploads
+            .filter((row) => diagnosisFilter === 'all' || inferResultSource(row) === diagnosisFilter)
+            .sort((a, b) => new Date(b?.captured_at || b?.received_at || 0).getTime() - new Date(a?.captured_at || a?.received_at || 0).getTime())
+            .slice(0, 12);
+
+        aiContainer.innerHTML = rows.length
+            ? rows.map((row) => renderDiagnosisCard(row, inferCaptureMode(row))).join('')
+            : `<div class="p-6 text-center text-xs text-slate-500">${window.t('no_data')}</div>`;
     };
 
     const openImagePreview = (url, title = '') => {
@@ -1297,6 +1306,10 @@ window.UI = (() => {
         switchView,
         renderSensorGrid,
         renderDiagnosis,
+        setDiagnosisFilter: (value) => {
+            diagnosisFilter = ['all', 'snapshot', 'upload'].includes(value) ? value : 'all';
+            renderDiagnosis(latestImageUploads);
+        },
         openSensorDetail,
         openImagePreview,
         HomePositioning,
