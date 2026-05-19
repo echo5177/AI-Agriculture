@@ -7,6 +7,7 @@ window.UI = (() => {
     let faultTrendChart;
     let latestImageUploads = [];
     let diagnosisFilter = 'all';
+    let visionOverlayTimer = null;
 
     const formatDate = (ts) => {
         if (!ts) return '--';
@@ -267,6 +268,7 @@ window.UI = (() => {
         const select = document.getElementById('aiDiagnosisSourceFilter');
         if (select && select.value !== diagnosisFilter) select.value = diagnosisFilter;
         const rows = latestImageUploads
+            .filter((row) => inferResultSource(row) !== 'live')
             .filter((row) => diagnosisFilter === 'all' || inferResultSource(row) === diagnosisFilter)
             .sort((a, b) => new Date(b?.captured_at || b?.received_at || 0).getTime() - new Date(a?.captured_at || a?.received_at || 0).getTime())
             .slice(0, 12);
@@ -304,13 +306,34 @@ window.UI = (() => {
         statusEl.textContent = message;
     };
 
-    const setVisionImage = (url) => {
+    const setVisionImage = (url, opts = {}) => {
         const preview = document.getElementById('mobileUploadPreview');
         const emptyState = document.getElementById('mobileUploadPreviewEmpty');
         if (!preview || !emptyState || !url) return;
+        if (visionOverlayTimer) {
+            window.clearTimeout(visionOverlayTimer);
+            visionOverlayTimer = null;
+        }
         preview.src = url;
         preview.classList.remove('hidden');
         emptyState.classList.add('hidden');
+        const temporaryMs = Number(opts.temporaryMs) || 0;
+        if (temporaryMs > 0) {
+            visionOverlayTimer = window.setTimeout(() => {
+                preview.classList.add('hidden');
+                if (opts.revoke) URL.revokeObjectURL(url);
+                visionOverlayTimer = null;
+            }, temporaryMs);
+        }
+    };
+
+    const setVisionVideoActive = (active) => {
+        const video = document.getElementById('mobileLiveVideo');
+        const preview = document.getElementById('mobileUploadPreview');
+        const emptyState = document.getElementById('mobileUploadPreviewEmpty');
+        if (video) video.classList.toggle('hidden', !active);
+        if (emptyState) emptyState.classList.toggle('hidden', active);
+        if (preview) preview.classList.add('hidden');
     };
 
     // --- Home Positioning Submodule ---
@@ -506,7 +529,8 @@ window.UI = (() => {
             if (!file) {
                 preview.src = '';
                 preview.classList.add('hidden');
-                emptyState.classList.remove('hidden');
+                const liveVideo = document.getElementById('mobileLiveVideo');
+                emptyState.classList.toggle('hidden', !!liveVideo?.srcObject);
                 return;
             }
             const blobUrl = URL.createObjectURL(file);
@@ -607,17 +631,20 @@ window.UI = (() => {
         stream: null,
         timer: null,
         isUploading: false,
-        intervalMs: 2200,
+        inferenceIntervalMs: 800,
 
         init: (deviceId = '') => {
             LiveCamera.activeDeviceId = (deviceId || localStorage.getItem('device_id') || '').trim();
             const liveBtn = document.getElementById('mobileLivePocBtn');
             const snapshotBtn = document.getElementById('mobileLiveSnapshotBtn');
-            if (!liveBtn || !snapshotBtn) return;
+            const stopBtn = document.getElementById('mobileLiveStopBtn');
+            if (!liveBtn || !snapshotBtn || !stopBtn) return;
 
             liveBtn.addEventListener('click', () => LiveCamera.start());
             snapshotBtn.addEventListener('click', () => LiveCamera.snapshot());
+            stopBtn.addEventListener('click', () => LiveCamera.stop());
             snapshotBtn.disabled = true;
+            stopBtn.disabled = true;
             setVisionStatus(window.t('waiting_image'), 'idle');
 
             window.addEventListener('beforeunload', () => LiveCamera.stop());
@@ -627,9 +654,14 @@ window.UI = (() => {
             const video = document.getElementById('mobileLiveVideo');
             const snapshotBtn = document.getElementById('mobileLiveSnapshotBtn');
             const liveBtn = document.getElementById('mobileLivePocBtn');
+            const stopBtn = document.getElementById('mobileLiveStopBtn');
             if (!video) return;
             if (LiveCamera.stream) {
                 setVisionStatus(window.t('live_camera_running'), 'success');
+                return;
+            }
+            if (!window.confirm(window.t('live_camera_confirm'))) {
+                setVisionStatus(window.t('waiting_image'), 'idle');
                 return;
             }
 
@@ -637,20 +669,22 @@ window.UI = (() => {
             if (liveBtn) liveBtn.disabled = true;
             try {
                 LiveCamera.stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+                    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 60 } },
                     audio: false,
                 });
                 video.srcObject = LiveCamera.stream;
+                setVisionVideoActive(true);
                 await video.play();
                 if (snapshotBtn) snapshotBtn.disabled = false;
+                if (stopBtn) stopBtn.disabled = false;
                 setVisionStatus(window.t('live_camera_running'), 'success');
-                LiveCamera.timer = window.setInterval(() => LiveCamera.uploadFrame('live'), LiveCamera.intervalMs);
-                LiveCamera.uploadFrame('live');
+                LiveCamera.timer = window.setInterval(() => LiveCamera.inferLiveFrame(), LiveCamera.inferenceIntervalMs);
+                LiveCamera.inferLiveFrame();
             } catch (err) {
                 LiveCamera.stop();
                 setVisionStatus(`${window.t('live_camera_failed')}: ${err.message || err}`, 'error');
             } finally {
-                if (liveBtn) liveBtn.disabled = false;
+                if (liveBtn) liveBtn.disabled = !!LiveCamera.stream;
             }
         },
 
@@ -663,12 +697,20 @@ window.UI = (() => {
                 LiveCamera.stream.getTracks().forEach((track) => track.stop());
                 LiveCamera.stream = null;
             }
+            const video = document.getElementById('mobileLiveVideo');
+            if (video) video.srcObject = null;
+            setVisionVideoActive(false);
+            setVisionStatus(window.t('live_camera_stopped'), 'idle');
+            const liveBtn = document.getElementById('mobileLivePocBtn');
             const snapshotBtn = document.getElementById('mobileLiveSnapshotBtn');
+            const stopBtn = document.getElementById('mobileLiveStopBtn');
+            if (liveBtn) liveBtn.disabled = false;
             if (snapshotBtn) snapshotBtn.disabled = true;
+            if (stopBtn) stopBtn.disabled = true;
         },
 
         snapshot: async () => {
-            const result = await LiveCamera.uploadFrame('snapshot', { force: true });
+            const result = await LiveCamera.uploadSnapshot();
             if (!result?.upload_id) return;
             setVisionStatus(`${window.t('live_snapshot_saved')}: ${result.predicted_class || result.upload_id}`, 'success');
             if (window.APP && typeof window.APP.refreshNow === 'function') {
@@ -676,18 +718,43 @@ window.UI = (() => {
             }
         },
 
-        uploadFrame: async (captureInput, opts = {}) => {
-            if (LiveCamera.isUploading && !opts.force) return null;
+        inferLiveFrame: async () => {
+            if (LiveCamera.isUploading || !LiveCamera.stream) return null;
             const video = document.getElementById('mobileLiveVideo');
             if (!video || !video.videoWidth || !video.videoHeight) return null;
 
             LiveCamera.isUploading = true;
-            if (captureInput === 'live') {
-                setVisionStatus(window.t('live_camera_uploading'), 'loading');
-            }
+            setVisionStatus(window.t('live_camera_uploading'), 'loading');
             try {
-                const file = await LiveCamera.captureFile(captureInput);
-                const tag = LiveCamera.resolveTag(captureInput);
+                const file = await LiveCamera.captureFile('live');
+                const form = new FormData();
+                form.append('file', file, file.name);
+                const headers = {};
+                const token = window.API.getAuthToken && window.API.getAuthToken();
+                if (token) headers.Authorization = `Bearer ${token}`;
+                const resp = await fetch('/api/v1/image/infer-live', { method: 'POST', body: form, headers });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const blob = await resp.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                setVisionImage(objectUrl, { temporaryMs: Math.max(900, LiveCamera.inferenceIntervalMs + 150), revoke: true });
+                const predicted = resp.headers.get('X-Predicted-Class') || window.t('accepted');
+                setVisionStatus(`${window.t('live_camera_running')}: ${predicted}`, 'success');
+                return { predicted_class: predicted };
+            } catch (err) {
+                setVisionStatus(`${window.t('live_camera_failed')}: ${err.message || err}`, 'error');
+                return null;
+            } finally {
+                LiveCamera.isUploading = false;
+            }
+        },
+
+        uploadSnapshot: async () => {
+            const video = document.getElementById('mobileLiveVideo');
+            if (!video || !video.videoWidth || !video.videoHeight) return null;
+
+            try {
+                const file = await LiveCamera.captureFile('snapshot');
+                const tag = LiveCamera.resolveTag('snapshot');
                 if (!tag.device_id) {
                     setVisionStatus(window.t('mobile_no_device_id'), 'error');
                     return null;
@@ -696,16 +763,10 @@ window.UI = (() => {
                 if (result.upload_id) {
                     setVisionImage(`/api/v1/image/file?upload_id=${encodeURIComponent(result.upload_id)}&_=${Date.now()}`);
                 }
-                if (captureInput === 'live') {
-                    setVisionStatus(`${window.t('live_camera_running')}: ${result.predicted_class || window.t('accepted')}`, 'success');
-                }
                 return result;
             } catch (err) {
-                const key = captureInput === 'snapshot' ? 'live_snapshot_failed' : 'live_camera_failed';
-                setVisionStatus(`${window.t(key)}: ${err.message || err}`, 'error');
+                setVisionStatus(`${window.t('live_snapshot_failed')}: ${err.message || err}`, 'error');
                 return null;
-            } finally {
-                LiveCamera.isUploading = false;
             }
         },
 

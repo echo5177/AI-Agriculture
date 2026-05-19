@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, File, UploadFile, Query, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 from typing import Any
 import uuid
@@ -154,6 +154,26 @@ async def upload_image(
             "captured_at": ts or datetime.utcnow().isoformat() + "Z",
             "upload_status": "inferred"
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/image/infer-live")
+async def infer_live_image(file: UploadFile = File(...)):
+    """Run inference for live preview without writing image records to disk."""
+    try:
+        image_bytes = await file.read()
+        prediction, annotated_bytes = _predict(image_bytes)
+        output_bytes = annotated_bytes or image_bytes
+        return Response(
+            content=output_bytes,
+            media_type="image/jpeg",
+            headers={
+                "X-Predicted-Class": prediction.predicted_class,
+                "X-Confidence": str(prediction.confidence),
+            },
+        )
+    except ImageLoadError:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

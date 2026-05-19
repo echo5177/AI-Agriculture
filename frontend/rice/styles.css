@@ -541,9 +541,13 @@
 
 .mobile-live-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   align-items: center;
+}
+
+.mobile-live-actions > span {
+  grid-column: 1 / -1;
 }
 
 .mobile-upload-panel {
@@ -703,10 +707,6 @@
 
   .mobile-live-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .mobile-live-actions span {
-    grid-column: 1 / -1;
   }
 }
 

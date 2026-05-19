@@ -81,9 +81,9 @@
                                   </div>
                               </div>
                               <div class="vision-stage aspect-video bg-black/40 rounded-xl overflow-hidden border border-white/10 relative mb-4">
-                                  <img id="mobileUploadPreview" src="" alt="preview" class="hidden w-full h-full object-contain bg-black" />
+                                  <video id="mobileLiveVideo" autoplay muted playsinline class="hidden absolute inset-0 w-full h-full object-contain bg-black"></video>
+                                  <img id="mobileUploadPreview" src="" alt="preview" class="hidden absolute inset-0 w-full h-full object-contain bg-black" />
                                   <div id="mobileUploadPreviewEmpty" class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs" data-i18n="waiting_image">Waiting image...</div>
-                                  <video id="mobileLiveVideo" autoplay muted playsinline class="hidden"></video>
                                   <canvas id="mobileLiveCanvas" class="hidden"></canvas>
                               </div>
                               <div class="mobile-live-actions mb-5">
@@ -97,6 +97,12 @@
                                      disabled>
                                       <i class="fa fa-camera-retro"></i>
                                       <span data-i18n="live_snapshot">Snapshot</span>
+                                  </button>
+                                  <button id="mobileLiveStopBtn"
+                                     class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-rose-600/10 border border-rose-600/20 text-xs text-rose-800 font-bold hover:bg-rose-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                     disabled>
+                                      <i class="fa fa-stop"></i>
+                                      <span data-i18n="live_stop">Stop</span>
                                   </button>
                                   <span class="text-[10px] text-[#332b21]/60" data-i18n="mobile_live_poc_desc">Live frames run through YOLO.</span>
                               </div>
