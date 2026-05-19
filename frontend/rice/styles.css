@@ -539,6 +539,22 @@
   gap: 0.5rem;
 }
 
+.mobile-live-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.mobile-upload-panel {
+  border-top: 1px solid rgba(51, 43, 33, 0.1);
+  padding-top: 1rem;
+}
+
+.vision-stage {
+  min-height: 260px;
+}
+
 .diagnosis-scroll {
   scrollbar-gutter: stable;
 }
@@ -676,6 +692,14 @@
   .mobile-upload-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .mobile-live-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-live-actions span {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 640px) {
@@ -722,6 +746,10 @@
   }
 
   .mobile-upload-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-live-actions {
     grid-template-columns: 1fr;
   }
 
