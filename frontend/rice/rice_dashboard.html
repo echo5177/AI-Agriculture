@@ -104,6 +104,14 @@
                                       <i class="fa fa-stop"></i>
                                       <span data-i18n="live_stop">Stop</span>
                                   </button>
+                                  <select id="cameraInferenceRate"
+                                     class="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-violet-600/10 border border-violet-600/20 text-xs text-violet-800 font-bold hover:bg-violet-600/20 transition-all focus:outline-none cursor-pointer">
+                                      <option value="2000" data-i18n="rate_low">0.5 FPS</option>
+                                      <option value="1200" data-i18n="rate_mid">0.8 FPS</option>
+                                      <option value="800" selected data-i18n="rate_normal">1.25 FPS</option>
+                                      <option value="400" data-i18n="rate_high">2.5 FPS</option>
+                                      <option value="200" data-i18n="rate_max">5.0 FPS</option>
+                                  </select>
                                   <span class="text-[10px] text-[#332b21]/60" data-i18n="mobile_live_poc_desc">Live frames run through YOLO.</span>
                               </div>
                               <div class="mobile-upload-panel">

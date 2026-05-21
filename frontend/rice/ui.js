@@ -647,6 +647,18 @@ window.UI = (() => {
             stopBtn.disabled = true;
             setVisionStatus(window.t('waiting_image'), 'idle');
 
+            const rateSelect = document.getElementById('cameraInferenceRate');
+            if (rateSelect) {
+                rateSelect.addEventListener('change', (e) => {
+                    const newInterval = parseInt(e.target.value, 10) || 800;
+                    LiveCamera.inferenceIntervalMs = newInterval;
+                    if (LiveCamera.stream && LiveCamera.timer) {
+                        window.clearInterval(LiveCamera.timer);
+                        LiveCamera.timer = window.setInterval(() => LiveCamera.inferLiveFrame(), LiveCamera.inferenceIntervalMs);
+                    }
+                });
+            }
+
             window.addEventListener('beforeunload', () => LiveCamera.stop());
         },
 

@@ -59,6 +59,11 @@ window.I18N = (() => {
             result_filter_upload: '上传的图片',
             start_loop_capture: '开始循环抓拍',
             accepted: '已接收',
+            rate_low: '0.5 FPS (慢速)',
+            rate_mid: '0.8 FPS (中速)',
+            rate_normal: '1.25 FPS (默认)',
+            rate_high: '2.5 FPS (快速)',
+            rate_max: '5.0 FPS (极速)',
         },
         en: {
             nav_home: 'Dashboard', nav_charts: 'Analytics', nav_health: 'System Health', nav_refresh: 'Refresh System',
@@ -114,6 +119,11 @@ window.I18N = (() => {
             result_filter_upload: 'Uploaded Images',
             start_loop_capture: 'Start Loop Capture',
             accepted: 'accepted',
+            rate_low: '0.5 FPS (Slow)',
+            rate_mid: '0.8 FPS (Medium)',
+            rate_normal: '1.25 FPS (Default)',
+            rate_high: '2.5 FPS (Fast)',
+            rate_max: '5.0 FPS (Max)',
         },
         ms: {
             nav_home: 'Laman Utama', nav_charts: 'Analisis', nav_health: 'Kesihatan Sistem', nav_refresh: 'Segar Semula Sistem',
@@ -169,6 +179,11 @@ window.I18N = (() => {
             result_filter_upload: 'Imej Dimuat Naik',
             start_loop_capture: 'Mula Tangkapan Gelung',
             accepted: 'diterima',
+            rate_low: '0.5 FPS (Perlahan)',
+            rate_mid: '0.8 FPS (Sederhana)',
+            rate_normal: '1.25 FPS (Lalai)',
+            rate_high: '2.5 FPS (Pantas)',
+            rate_max: '5.0 FPS (Maksimum)',
         },
     };
 
