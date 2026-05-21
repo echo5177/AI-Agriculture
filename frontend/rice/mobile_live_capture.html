@@ -81,10 +81,28 @@
     async function startCamera() {
       if (state.stream) return;
       try {
-        state.stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false
-        });
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("浏览器安全上下文限制，必须使用 HTTPS 或 localhost 访问方可使用摄像头。");
+        }
+        let stream = null;
+        const constraintsList = [
+          { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: { facingMode: { ideal: "environment" } }, audio: false },
+          { video: true, audio: false }
+        ];
+        let lastErr = null;
+        for (const constraints of constraintsList) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            if (stream) break;
+          } catch (e) {
+            lastErr = e;
+          }
+        }
+        if (!stream) {
+          throw lastErr || new Error("无法获取视频流，请检查权限。");
+        }
+        state.stream = stream;
         $("preview").srcObject = state.stream;
         log("camera started");
       } catch (e) {
