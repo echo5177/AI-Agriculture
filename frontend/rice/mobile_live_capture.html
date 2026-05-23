@@ -24,16 +24,13 @@
     #log { white-space: pre-wrap; font-size: 12px; line-height: 1.4; background: rgba(51, 43, 33, 0.05); border: 1px solid rgba(51, 43, 33, 0.1); border-radius: 8px; padding: 12px; min-height: 120px; max-height: 260px; overflow: auto; font-family: monospace; }
     .muted { opacity: 0.7; font-size: 12px; font-weight: 400; }
     label { display: flex; align-items: center; gap: 6px; }
-    @media screen and (orientation: portrait) {
-      #portraitWarning { display: block !important; }
+    #preview.rotated {
+      transform: rotate(90deg);
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div id="portraitWarning" style="display:none; background: #e11d48; color: white; padding: 10px; text-align: center; font-weight: bold; margin-bottom: 12px; border-radius: 8px; font-size: 14px;">
-      <i class="fa fa-rotate-left"></i> 建议：为了更好的拍摄体验和检测效果，请将手机【横屏】使用
-    </div>
     <div class="card">
       <h3 style="margin: 0 0 8px 0; color: #332b21;"><i class="fa fa-video-camera" style="color: #8b5cf6; margin-right: 8px;"></i><span data-i18n="mobile_live_poc">Live Camera PoC</span></h3>
       <div class="muted" data-i18n="mobile_live_poc_desc">Open real-time camera frame upload page</div>
@@ -50,8 +47,12 @@
         <label>Interval(s) <input id="intervalSec" type="number" min="0.2" step="0.1" value="2.0" style="width: 70px;" /></label>
         <label>Endpoint <input id="endpoint" value="/api/v1/image/upload" style="min-width: 200px;" /></label>
       </div>
+      <div class="row">
+        <label>Lens <select id="videoSource" style="padding:4px; border-radius:4px; max-width:200px; font-size:12px;"></select></label>
+      </div>
       <div class="row" style="margin-top: 16px;">
         <button id="startCam" class="primary"><i class="fa fa-camera"></i> <span data-i18n="live_shoot">Live Capture</span></button>
+        <button id="rotateCam" class="primary"><i class="fa fa-rotate-right"></i> Rotate View</button>
         <button id="startLoop" class="primary"><i class="fa fa-refresh"></i> <span data-i18n="start_loop_capture">Start Loop Capture</span></button>
         <button id="stopLoop" class="warn"><i class="fa fa-stop"></i> <span data-i18n="mobile_clear">Clear</span></button>
         <span id="stats" class="muted" style="margin-left: auto; font-family: monospace; font-weight: bold;">sent=0 ok=0 fail=0</span>
@@ -72,7 +73,47 @@
   <script>
     const q = new URLSearchParams(location.search);
     const $ = (id) => document.getElementById(id);
-    const state = { stream: null, timer: null, sent: 0, ok: 0, fail: 0 };
+    const state = { stream: null, timer: null, sent: 0, ok: 0, fail: 0, isRotated: false };
+
+    async function getCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        const select = $("videoSource");
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = "";
+        videoDevices.forEach((device, index) => {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.text = device.label || `Camera ${index + 1}`;
+          select.appendChild(option);
+        });
+        if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+          select.value = currentVal;
+        }
+      } catch (e) {
+        log("enumerate devices failed: " + e.message);
+      }
+    }
+    
+    $("videoSource") && $("videoSource").addEventListener("change", async () => {
+      if (state.stream) {
+        state.stream.getTracks().forEach(t => t.stop());
+        state.stream = null;
+        await startCamera();
+      }
+    });
+
+    $("rotateCam") && $("rotateCam").addEventListener("click", () => {
+      state.isRotated = !state.isRotated;
+      if (state.isRotated) {
+        $("preview").classList.add("rotated");
+      } else {
+        $("preview").classList.remove("rotated");
+      }
+    });
+
     $("deviceId").value = q.get("device_id") || "dev_mobile_live_01";
     if (q.get("endpoint")) $("endpoint").value = q.get("endpoint");
 
@@ -90,12 +131,19 @@
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("浏览器安全上下文限制，必须使用 HTTPS 或 localhost 访问方可使用摄像头。");
         }
+
         let stream = null;
+        const deviceId = $("videoSource") ? $("videoSource").value : null;
+        let baseVideoConstraint = { facingMode: { ideal: "environment" } };
+        if (deviceId) {
+          baseVideoConstraint = { deviceId: { exact: deviceId } };
+        }
+
         const constraintsList = [
-          { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 }, advanced: [{ focusMode: "continuous" }] }, audio: false },
-          { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
-          { video: { facingMode: { ideal: "environment" }, advanced: [{ focusMode: "continuous" }] }, audio: false },
-          { video: { facingMode: { ideal: "environment" } }, audio: false },
+          { video: { ...baseVideoConstraint, width: { ideal: 1280 }, height: { ideal: 720 }, advanced: [{ focusMode: "continuous" }] }, audio: false },
+          { video: { ...baseVideoConstraint, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: { ...baseVideoConstraint, advanced: [{ focusMode: "continuous" }] }, audio: false },
+          { video: { ...baseVideoConstraint }, audio: false },
           { video: true, audio: false }
         ];
         let lastErr = null;
@@ -113,6 +161,10 @@
         state.stream = stream;
         $("preview").srcObject = state.stream;
         log("camera started");
+
+        if ($("videoSource") && ($("videoSource").options.length === 0 || !$("videoSource").options[0].text.includes("Camera"))) {
+            await getCameras();
+        }
       } catch (e) {
         log("camera failed: " + e.message);
       }
@@ -135,10 +187,18 @@
       const cropType = $("cropType").value.trim();
       const farmNote = $("farmNote").value.trim();
       const canvas = $("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0);
+      if (state.isRotated) {
+        canvas.width = video.videoHeight;
+        canvas.height = video.videoWidth;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(90 * Math.PI / 180);
+        ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2);
+      } else {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+      }
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
       if (!blob) {
         log("capture failed: canvas blob null");
