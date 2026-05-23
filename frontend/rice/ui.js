@@ -632,6 +632,7 @@ window.UI = (() => {
         timer: null,
         isUploading: false,
         inferenceIntervalMs: 800,
+        availableDevices: [],
 
         init: (deviceId = '') => {
             LiveCamera.activeDeviceId = (deviceId || localStorage.getItem('device_id') || '').trim();
@@ -659,10 +660,56 @@ window.UI = (() => {
                 });
             }
 
+            const sourceSelect = document.getElementById('mobileLiveVideoSource');
+            if (sourceSelect) {
+                sourceSelect.addEventListener('change', (e) => {
+                    if (LiveCamera.stream) {
+                        LiveCamera.stop();
+                        setTimeout(() => LiveCamera.start(e.target.value), 300);
+                    }
+                });
+            }
+
+            const video = document.getElementById('mobileLiveVideo');
+            if (video) {
+                video.addEventListener('click', () => {
+                    video.classList.toggle('fullscreen-video');
+                });
+            }
+
+            const preview = document.getElementById('mobileUploadPreview');
+            if (preview) {
+                preview.addEventListener('click', () => {
+                    preview.classList.toggle('fullscreen-video');
+                });
+            }
+
             window.addEventListener('beforeunload', () => LiveCamera.stop());
+            LiveCamera.enumerateDevices();
         },
 
-        start: async () => {
+        enumerateDevices: async () => {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoInputs = devices.filter(d => d.kind === 'videoinput');
+                LiveCamera.availableDevices = videoInputs;
+                const sourceSelect = document.getElementById('mobileLiveVideoSource');
+                if (sourceSelect && videoInputs.length > 0) {
+                    sourceSelect.innerHTML = '<option value="">Auto Lens</option>';
+                    videoInputs.forEach((device, index) => {
+                        const opt = document.createElement('option');
+                        opt.value = device.deviceId;
+                        opt.text = device.label || `Camera ${index + 1}`;
+                        sourceSelect.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.warn("enumerateDevices error", err);
+            }
+        },
+
+        start: async (preferredDeviceId = null) => {
             const video = document.getElementById('mobileLiveVideo');
             const snapshotBtn = document.getElementById('mobileLiveSnapshotBtn');
             const liveBtn = document.getElementById('mobileLivePocBtn');
@@ -672,7 +719,7 @@ window.UI = (() => {
                 setVisionStatus(window.t('live_camera_running'), 'success');
                 return;
             }
-            if (!window.confirm(window.t('live_camera_confirm'))) {
+            if (!preferredDeviceId && !window.confirm(window.t('live_camera_confirm'))) {
                 setVisionStatus(window.t('waiting_image'), 'idle');
                 return;
             }
@@ -684,13 +731,25 @@ window.UI = (() => {
                     throw new Error("浏览器安全上下文限制，必须使用 HTTPS 或 localhost 访问方可使用摄像头。");
                 }
 
+                await LiveCamera.enumerateDevices();
+
                 let stream = null;
-                const constraintsList = [
-                    { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 60 } }, audio: false },
-                    { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
-                    { video: { facingMode: { ideal: 'environment' } }, audio: false },
-                    { video: true, audio: false }
-                ];
+                const sourceSelect = document.getElementById('mobileLiveVideoSource');
+                // preferredDeviceId could be a string or an Event object if triggered by UI without args
+                let selectedDeviceId = (typeof preferredDeviceId === 'string') ? preferredDeviceId : (sourceSelect ? sourceSelect.value : null);
+
+                let constraintsList = [];
+                if (selectedDeviceId) {
+                    constraintsList.push({ video: { deviceId: { exact: selectedDeviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+                    constraintsList.push({ video: { deviceId: { exact: selectedDeviceId } }, audio: false });
+                } else {
+                    constraintsList = [
+                        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 60 } }, audio: false },
+                        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+                        { video: { facingMode: { ideal: 'environment' } }, audio: false },
+                        { video: true, audio: false }
+                    ];
+                }
 
                 let lastErr = null;
                 for (const constraints of constraintsList) {
@@ -708,6 +767,17 @@ window.UI = (() => {
 
                 LiveCamera.stream = stream;
                 video.srcObject = LiveCamera.stream;
+
+                if (sourceSelect && !selectedDeviceId) {
+                     const track = stream.getVideoTracks()[0];
+                     if (track) {
+                         const settings = track.getSettings();
+                         if (settings && settings.deviceId) {
+                             sourceSelect.value = settings.deviceId;
+                         }
+                     }
+                }
+
                 setVisionVideoActive(true);
                 await video.play();
                 if (snapshotBtn) snapshotBtn.disabled = false;
