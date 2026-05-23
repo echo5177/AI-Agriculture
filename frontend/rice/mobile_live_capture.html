@@ -24,10 +24,16 @@
     #log { white-space: pre-wrap; font-size: 12px; line-height: 1.4; background: rgba(51, 43, 33, 0.05); border: 1px solid rgba(51, 43, 33, 0.1); border-radius: 8px; padding: 12px; min-height: 120px; max-height: 260px; overflow: auto; font-family: monospace; }
     .muted { opacity: 0.7; font-size: 12px; font-weight: 400; }
     label { display: flex; align-items: center; gap: 6px; }
+    @media screen and (orientation: portrait) {
+      #portraitWarning { display: block !important; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div id="portraitWarning" style="display:none; background: #e11d48; color: white; padding: 10px; text-align: center; font-weight: bold; margin-bottom: 12px; border-radius: 8px; font-size: 14px;">
+      <i class="fa fa-rotate-left"></i> 建议：为了更好的拍摄体验和检测效果，请将手机【横屏】使用
+    </div>
     <div class="card">
       <h3 style="margin: 0 0 8px 0; color: #332b21;"><i class="fa fa-video-camera" style="color: #8b5cf6; margin-right: 8px;"></i><span data-i18n="mobile_live_poc">Live Camera PoC</span></h3>
       <div class="muted" data-i18n="mobile_live_poc_desc">Open real-time camera frame upload page</div>
@@ -86,7 +92,9 @@
         }
         let stream = null;
         const constraintsList = [
+          { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 }, advanced: [{ focusMode: "continuous" }] }, audio: false },
           { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: { facingMode: { ideal: "environment" }, advanced: [{ focusMode: "continuous" }] }, audio: false },
           { video: { facingMode: { ideal: "environment" } }, audio: false },
           { video: true, audio: false }
         ];
