@@ -24,9 +24,18 @@
     #log { white-space: pre-wrap; font-size: 12px; line-height: 1.4; background: rgba(51, 43, 33, 0.05); border: 1px solid rgba(51, 43, 33, 0.1); border-radius: 8px; padding: 12px; min-height: 120px; max-height: 260px; overflow: auto; font-family: monospace; }
     .muted { opacity: 0.7; font-size: 12px; font-weight: 400; }
     label { display: flex; align-items: center; gap: 6px; }
-    #preview.rotated {
-      transform: rotate(90deg);
+    #preview.fullscreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      max-height: none;
+      z-index: 9999;
+      object-fit: contain;
+      background: #000;
+      border-radius: 0;
+      cursor: zoom-out;
     }
+    #preview:not(.fullscreen) { cursor: zoom-in; }
   </style>
 </head>
 <body>
@@ -52,7 +61,6 @@
       </div>
       <div class="row" style="margin-top: 16px;">
         <button id="startCam" class="primary"><i class="fa fa-camera"></i> <span data-i18n="live_shoot">Live Capture</span></button>
-        <button id="rotateCam" class="primary"><i class="fa fa-rotate-right"></i> Rotate View</button>
         <button id="startLoop" class="primary"><i class="fa fa-refresh"></i> <span data-i18n="start_loop_capture">Start Loop Capture</span></button>
         <button id="stopLoop" class="warn"><i class="fa fa-stop"></i> <span data-i18n="mobile_clear">Clear</span></button>
         <span id="stats" class="muted" style="margin-left: auto; font-family: monospace; font-weight: bold;">sent=0 ok=0 fail=0</span>
@@ -73,7 +81,7 @@
   <script>
     const q = new URLSearchParams(location.search);
     const $ = (id) => document.getElementById(id);
-    const state = { stream: null, timer: null, sent: 0, ok: 0, fail: 0, isRotated: false };
+    const state = { stream: null, timer: null, sent: 0, ok: 0, fail: 0 };
 
     async function getCameras() {
       try {
@@ -105,12 +113,9 @@
       }
     });
 
-    $("rotateCam") && $("rotateCam").addEventListener("click", () => {
-      state.isRotated = !state.isRotated;
-      if (state.isRotated) {
-        $("preview").classList.add("rotated");
-      } else {
-        $("preview").classList.remove("rotated");
+    $("preview").addEventListener("click", function() {
+      if (state.stream) {
+        this.classList.toggle("fullscreen");
       }
     });
 
@@ -187,18 +192,10 @@
       const cropType = $("cropType").value.trim();
       const farmNote = $("farmNote").value.trim();
       const canvas = $("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
-      if (state.isRotated) {
-        canvas.width = video.videoHeight;
-        canvas.height = video.videoWidth;
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(90 * Math.PI / 180);
-        ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2);
-      } else {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-      }
+      ctx.drawImage(video, 0, 0);
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
       if (!blob) {
         log("capture failed: canvas blob null");
