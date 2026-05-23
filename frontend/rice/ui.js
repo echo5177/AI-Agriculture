@@ -732,12 +732,13 @@ window.UI = (() => {
                 let selectedDeviceId = (typeof preferredDeviceId === 'string') ? preferredDeviceId : (sourceSelect ? sourceSelect.value : null);
 
                 let constraintsList = [];
+                const advancedFocus = [{ focusMode: 'continuous' }];
                 if (selectedDeviceId) {
-                    constraintsList.push({ video: { deviceId: { exact: selectedDeviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+                    constraintsList.push({ video: { deviceId: { exact: selectedDeviceId }, width: { ideal: 1280 }, height: { ideal: 720 }, advanced: advancedFocus }, audio: false });
                     constraintsList.push({ video: { deviceId: { exact: selectedDeviceId } }, audio: false });
                 } else {
                     constraintsList = [
-                        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 60 } }, audio: false },
+                        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 60 }, advanced: advancedFocus }, audio: false },
                         { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
                         { video: { facingMode: { ideal: 'environment' } }, audio: false },
                         { video: true, audio: false }
