@@ -670,17 +670,10 @@ window.UI = (() => {
                 });
             }
 
-            const video = document.getElementById('mobileLiveVideo');
-            if (video) {
-                video.addEventListener('click', () => {
-                    video.classList.toggle('fullscreen-video');
-                });
-            }
-
-            const preview = document.getElementById('mobileUploadPreview');
-            if (preview) {
-                preview.addEventListener('click', () => {
-                    preview.classList.toggle('fullscreen-video');
+            const visionStage = document.querySelector('.vision-stage');
+            if (visionStage) {
+                visionStage.addEventListener('click', () => {
+                    visionStage.classList.toggle('fullscreen-video');
                 });
             }
 
