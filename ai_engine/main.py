@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
         if os.path.exists(YOLO_MODEL_PATH):
             from ai_engine.crops.rice.inference.yolo_detector import YoloDetector
             logger.info("Loading YOLO model from: %s", YOLO_MODEL_PATH)
-            detector = YoloDetector(model_path=YOLO_MODEL_PATH)
+            detector = YoloDetector(model_path=YOLO_MODEL_PATH, confidence_threshold=0.60)
             set_yolo_detector(detector)
             logger.info("YOLO detector loaded successfully (%d classes).", len(detector.class_names))
         else:
