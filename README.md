@@ -1,5 +1,7 @@
 # AI-Agriculture (智慧农业 AI 系统 - 水稻病害检测)
 
+[English](./README_EN.md) | 简体中文
+
 这是一个面向智慧农业的 AI 系统原型，集成了**水稻叶片病害目标检测（Object Detection）**与**图像分类（Image Classification）**双模型架构。系统提供精美的 Web 仪表盘，支持**手机端实时摄像头拍摄识别**和**本地图片上传诊断**。
 
 ## 核心亮点
@@ -13,7 +15,11 @@
 ## 快速启动 (Windows)
 
 1. **环境准备**：
-   确保已安装 Python 3.9+。建议使用你已有的 `plant` conda 环境。
+   确保已安装 Python 3.9+。建议使用 Anaconda/Miniconda 创建并激活一个新的虚拟环境：
+   ```bash
+   conda create -n ai_agriculture python=3.9
+   conda activate ai_agriculture
+   ```
 
 2. **安装依赖**：
    ```bash
